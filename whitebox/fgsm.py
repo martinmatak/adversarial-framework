@@ -1,4 +1,4 @@
-from utils.generator import TestGenerator
+from utils.generator import TestGenerator, TargetGenerator
 from keras.optimizers import Adam
 from keras import metrics
 import keras
@@ -9,7 +9,7 @@ from keras.models import load_model
 from cleverhans.utils_keras import KerasModelWrapper
 from cleverhans.utils_tf import model_eval
 from cleverhans.attacks import FastGradientMethod
-
+from keras.utils import to_categorical
 
 BATCH_SIZE = 1
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/github-pretrained.hdf5'
@@ -33,7 +33,7 @@ wrap = KerasModelWrapper(model)
 
 print("Model loaded")
 
-# load dataset
+# load legit dataset
 test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
 x_tmp, y_tmp = zip(*(test_generator[i] for i in range(len(test_generator))))
 x_test, y_test = np.vstack(x_tmp), np.vstack(y_tmp)
@@ -47,20 +47,31 @@ y = tf.placeholder(tf.float32, shape=(None, NB_CLASSES))
 # Evaluate the accuracy on legit samples
 eval_par = {'batch_size': BATCH_SIZE}
 acc = model_eval(sess, x, y, wrap.get_logits(x), x_test, y_test, args=eval_par)
-print('Test accuracy on legit examples: %0.4f\n' % acc)
+print('Percentage of legit samples that are correctly classified: %0.4f\n' % acc)
+
+# load adversarial labels
+TARGET_LABEL = 88
+target_generator = TargetGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE, TARGET_LABEL)
+x_tmp, y_tmp_adv = zip(*(target_generator[i] for i in range(len(target_generator))))
+x_test, y_test_target = np.vstack(x_tmp), np.vstack(y_tmp_adv)
 
 # Initialize the Fast Gradient Sign Method (FGSM) attack object and graph
 fgsm = FastGradientMethod(wrap, sess=sess)
-fgsm_params = {'eps': 0.3,
+
+targets_np = np.array([TARGET_LABEL])
+targets_np_one_hot = np.zeros((targets_np.size, NB_CLASSES))
+targets_np_one_hot[np.arange(targets_np.size), targets_np] = 1
+
+fgsm_params = {'eps': 0.9,
                'clip_min': 0.,
-               'clip_max': 255.}
+               'clip_max': 255.,
+               'y_target': targets_np_one_hot
+               }
 adv_x = fgsm.generate(x, **fgsm_params)
-
-# Consider the attack to be constant
 adv_x = tf.stop_gradient(adv_x)
+acc = model_eval(sess, x, y, wrap.get_logits(adv_x), x_test, y_test_target, args=eval_par)
+print('Percentage of adversarial samples classified as target label: %0.4f\n' % acc)
 
-# Evaluate the accuracy  on adversarial examples
-eval_par = {'batch_size': BATCH_SIZE}
 acc = model_eval(sess, x, y, wrap.get_logits(adv_x), x_test, y_test, args=eval_par)
-print('Test accuracy on adversarial examples: %0.4f\n' % acc)
+print('Percentage of adversarial samples that are correctly classified: %0.4f\n' % acc)
 
