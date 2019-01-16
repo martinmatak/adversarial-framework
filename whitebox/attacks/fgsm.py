@@ -6,5 +6,4 @@ def attack(sample, target_np_one_hot, fgsm):
                    'y_target': target_np_one_hot
                    }
     adv_x = fgsm.generate_np(sample, **fgsm_params)
-
     return adv_x

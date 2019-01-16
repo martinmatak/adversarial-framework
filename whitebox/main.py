@@ -1,4 +1,4 @@
-from utils.generator import TestGenerator, TargetGenerator
+from utils.generator import TestGenerator
 from keras.optimizers import Adam
 from keras import metrics
 from utils.image_ops import save_results
@@ -10,8 +10,8 @@ import tensorflow as tf
 import numpy as np
 from keras.models import load_model
 from cleverhans.utils_keras import KerasModelWrapper
-from cleverhans.attacks import FastGradientMethod
-from whitebox.attacks import fgsm
+from cleverhans.attacks import FastGradientMethod, CarliniWagnerL2, SaliencyMapMethod
+from whitebox.attacks import fgsm, cw, jsma
 
 
 BATCH_SIZE = 1
@@ -48,8 +48,24 @@ y = tf.placeholder(tf.float32, shape=(None, NB_CLASSES))
 evaluate(sess, x, y, wrap, test_generator)
 
 # pick the attack
-attack_instance_graph = FastGradientMethod(wrap, sess=sess)
-attack_instance = fgsm
+
+attack = 'fgsm'
+#attack = 'cw'
+
+# not working because of memory consumption
+#attack = 'jsma'
+
+if attack == 'fgsm':
+    attack_instance_graph = FastGradientMethod(wrap, sess)
+    attack_instance = fgsm
+elif attack == 'cw':
+    attack_instance_graph = CarliniWagnerL2(wrap, sess)
+    attack_instance = cw
+elif attack == 'jsma':
+    attack_instance_graph = SaliencyMapMethod(wrap, sess)
+    attack_instance = jsma
+else:
+    ValueError("Only FGSM, CW (L2) and JSMA attacks are supported")
 
 total_success = 0
 evaluated_samples = 0
@@ -60,11 +76,11 @@ print("Generating adv. samples for target class %i" % target_class)
 
 for legit_sample, legit_label in test_generator:
 
-    predicted_class = int(model_argmax(sess, x, wrap.get_logits(x), legit_sample))
-    print("Original predicted class: ", predicted_class)
-
     ground_truth = np.argmax(legit_label)
-    print("Original true class: ", ground_truth)
+    print("[Original sample] ground truth: ", ground_truth)
+
+    predicted_class = int(model_argmax(sess, x, wrap.get_logits(x), legit_sample))
+    print("[Original sample] predicted class: ", predicted_class)
 
     if ground_truth != predicted_class:
         print("Skipping sample because not correctly predicted")
@@ -76,7 +92,7 @@ for legit_sample, legit_label in test_generator:
     adv_x = attack_instance.attack(legit_sample, target_class_encoded, attack_instance_graph)
 
     predicted_class = int(model_argmax(sess, x, wrap.get_logits(x), adv_x))
-    print("Predicted class for adversarial sample: ", predicted_class)
+    print("[Adversarial sample] predicted class: ", predicted_class)
 
     save_results(adv_x[0, :, :, :], 'whitebox', 'fgsm', predicted_class == target_class, ground_truth, target_class)
 
@@ -90,3 +106,4 @@ for legit_sample, legit_label in test_generator:
 
 print("Total # of successful targeted attacks: " + str(total_success) + " / " + str(evaluated_samples))
 
+sess.close()
