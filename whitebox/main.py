@@ -1,22 +1,23 @@
 from utils.generator import TestGenerator
-from keras.optimizers import Adam
-from keras import metrics
-from utils.image_ops import save_results
+from utils.image_ops import save_results, L2_distance
 from utils.model_ops import model_argmax, evaluate
 from utils.numpy_ops import convert_to_one_hot
-import keras
+from whitebox.attacks import fgsm, cw, jsma
 
-import tensorflow as tf
-import numpy as np
+from keras.optimizers import Adam
+from keras import metrics
 from keras.models import load_model
 from cleverhans.utils_keras import KerasModelWrapper
 from cleverhans.attacks import FastGradientMethod, CarliniWagnerL2, SaliencyMapMethod
-from whitebox.attacks import fgsm, cw, jsma
+import keras
+import tensorflow as tf
+import numpy as np
+import random
 
+random.seed(111)
 
 BATCH_SIZE = 1
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/github-pretrained.hdf5'
-MODEL_PATH_OVERFIT = '/Users/mmatak/dev/thesis/adversarial_framework/model/weights.044-0.123-1.624.hdf5'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-overfit'
 IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
@@ -70,40 +71,30 @@ else:
 total_success = 0
 evaluated_samples = 0
 
-target_class = 88
-target_class_encoded = convert_to_one_hot(target_class, NB_CLASSES)
-print("Generating adv. samples for target class %i" % target_class)
+# evaluate on 50% target classes
+target_classes = random.sample(range(NB_CLASSES), 50)
 
-for legit_sample, legit_label in test_generator:
+diff_L2 = []
+for target_class in target_classes:
 
-    ground_truth = np.argmax(legit_label)
-    print("[Original sample] ground truth: ", ground_truth)
+    print("Generating adv. samples for target class %i" % target_class)
+    target_class_encoded = convert_to_one_hot(target_class, NB_CLASSES)
 
-    predicted_class = int(model_argmax(sess, x, wrap.get_logits(x), legit_sample))
-    print("[Original sample] predicted class: ", predicted_class)
+    for legit_sample, legit_label in test_generator:
 
-    if ground_truth != predicted_class:
-        print("Skipping sample because not correctly predicted")
-        print(" ")
-        continue
-    else:
+        adv_x = attack_instance.attack(legit_sample, target_class_encoded, attack_instance_graph)
+
+        predicted_class = int(model_argmax(sess, x, wrap.get_logits(x), adv_x))
+
+        if predicted_class == target_class:
+            save_results(adv_x[0, :, :, :], 'whitebox', attack, predicted_class == target_class, np.argmax(legit_label), target_class)
+            total_success += 1
+            # measure difference
+            diff_L2.append(L2_distance(legit_sample, adv_x))
+
         evaluated_samples += 1
 
-    adv_x = attack_instance.attack(legit_sample, target_class_encoded, attack_instance_graph)
-
-    predicted_class = int(model_argmax(sess, x, wrap.get_logits(x), adv_x))
-    print("[Adversarial sample] predicted class: ", predicted_class)
-
-    save_results(adv_x[0, :, :, :], 'whitebox', 'fgsm', predicted_class == target_class, ground_truth, target_class)
-
-    if predicted_class == target_class:
-        print("Attack was successful")
-        total_success += 1
-    else:
-        print("Attack was not successful")
-
-    print(" ")
-
 print("Total # of successful targeted attacks: " + str(total_success) + " / " + str(evaluated_samples))
+print("Total L2 perturbation summed by channels: ", str(sum(diff_L2) / float(len(diff_L2))))
 
 sess.close()

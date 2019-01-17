@@ -1,9 +1,9 @@
 def attack(sample, target_np_one_hot, fgsm):
 
-    fgsm_params = {'eps': 0.9,
+    fgsm_params = {'eps': 10,
                    'clip_min': 0.,
                    'clip_max': 255.,
-                   'y_target': target_np_one_hot
+                   'y_target': target_np_one_hot,
                    }
     adv_x = fgsm.generate_np(sample, **fgsm_params)
     return adv_x
