@@ -7,8 +7,10 @@ def save_results(adv_x, attack_type, attack_name, successful, original_class, ta
                  str(original_class) + '-' + str(target_class) + '-' + str(successful) + '.jpg'
     directory = '../results'
     path = directory + '/' + image_name
-    cv2.imwrite(path, adv_x)
+    save_image(path, adv_x)
 
+def save_image(path, image):
+    cv2.imwrite(path, image)
 
 # def L0_distance(image_a, image_b):
 #     return L_distance(image_a, image_b, 0)

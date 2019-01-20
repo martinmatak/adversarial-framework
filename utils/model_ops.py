@@ -1,4 +1,7 @@
 import numpy as np
+from keras import backend as K
+
+
 from cleverhans.utils_tf import model_eval
 
 
@@ -25,7 +28,7 @@ def model_argmax(sess, x, predictions, samples, feed=None):
         return np.argmax(probabilities, axis=1)
 
 
-def evaluate(sess, x, y, model, generator):
+def evaluate(model, generator):
     batch_size = 1
 
     # load dataset
@@ -34,8 +37,12 @@ def evaluate(sess, x, y, model, generator):
 
     print("Dataset loaded")
 
-    # Evaluate the accuracy
-    eval_par = {'batch_size': batch_size}
+    result = model.evaluate(x_test, y_test, batch_size, verbose=1)
 
-    acc = model_eval(sess, x, y, model.get_logits(x), x_test, y_test, args=eval_par)
-    print('Percentage of legit samples that are correctly classified: %0.4f\n' % acc)
+    print(model.metrics_names[1] + ": " + str(result[1]))
+
+def age_mae(y_true, y_pred):
+    true_age = K.sum(y_true * K.arange(0, 101, dtype="float32"), axis=-1)
+    pred_age = K.sum(y_pred * K.arange(0, 101, dtype="float32"), axis=-1)
+    mae = K.mean(K.abs(true_age - pred_age))
+    return mae

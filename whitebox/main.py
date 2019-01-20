@@ -1,11 +1,11 @@
 from utils.generator import TestGenerator
-from utils.image_ops import save_results, L2_distance
+from utils.image_ops import save_results, L2_distance, save_image
 from utils.model_ops import model_argmax, evaluate
 from utils.numpy_ops import convert_to_one_hot
 from whitebox.attacks import fgsm, cw, jsma
 
 from keras.optimizers import Adam
-from keras import metrics
+from utils.model_ops import age_mae
 from keras.models import load_model
 from cleverhans.utils_keras import KerasModelWrapper
 from cleverhans.attacks import FastGradientMethod, CarliniWagnerL2, SaliencyMapMethod
@@ -18,7 +18,7 @@ random.seed(111)
 
 BATCH_SIZE = 1
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/github-pretrained.hdf5'
-TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-overfit'
+TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
 IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
@@ -33,8 +33,7 @@ print("Session initialized")
 # load model
 model = load_model(MODEL_PATH, compile=False)
 
-model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[metrics.mae, metrics.categorical_accuracy])
-wrap = KerasModelWrapper(model)
+model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
 
 print("Model loaded")
 
@@ -45,17 +44,19 @@ test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
 x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE, NUM_OF_CHANNELS))
 y = tf.placeholder(tf.float32, shape=(None, NB_CLASSES))
 
-# evaluate model on legit dataset
-evaluate(sess, x, y, wrap, test_generator)
+# evaluate model
+evaluate(model, test_generator)
 
 # pick the attack
-
 attack = 'fgsm'
 #attack = 'cw'
 
 # not working because of memory consumption
 #attack = 'jsma'
 
+RESULT_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-adv/whitebox/' + attack
+
+wrap = KerasModelWrapper(model)
 if attack == 'fgsm':
     attack_instance_graph = FastGradientMethod(wrap, sess)
     attack_instance = fgsm
@@ -71,30 +72,33 @@ else:
 total_success = 0
 evaluated_samples = 0
 
-# evaluate on 50% target classes
-target_classes = random.sample(range(NB_CLASSES), 50)
-
 diff_L2 = []
-for target_class in target_classes:
 
-    print("Generating adv. samples for target class %i" % target_class)
-    target_class_encoded = convert_to_one_hot(target_class, NB_CLASSES)
+img_ids = [str("00" + str(i)) for i in range(5613, 7613)]
+id_index = 0
 
-    for legit_sample, legit_label in test_generator:
+ZERO_LABEL = convert_to_one_hot(0, NB_CLASSES)
+HUNDRED_LABEL = convert_to_one_hot(100, NB_CLASSES)
+for legit_sample, legit_label in test_generator:
 
-        adv_x = attack_instance.attack(legit_sample, target_class_encoded, attack_instance_graph)
+    ground_truth = np.argmax(legit_label)
 
-        predicted_class = int(model_argmax(sess, x, wrap.get_logits(x), adv_x))
+    if ground_truth > 50:
+        adv_x = attack_instance.attack(legit_sample, ZERO_LABEL, attack_instance_graph)
+    else:
+        adv_x = attack_instance.attack(legit_sample, HUNDRED_LABEL, attack_instance_graph)
 
-        if predicted_class == target_class:
-            save_results(adv_x[0, :, :, :], 'whitebox', attack, predicted_class == target_class, np.argmax(legit_label), target_class)
-            total_success += 1
-            # measure difference
-            diff_L2.append(L2_distance(legit_sample, adv_x))
 
-        evaluated_samples += 1
+    diff_L2.append(L2_distance(legit_sample, adv_x))
 
-print("Total # of successful targeted attacks: " + str(total_success) + " / " + str(evaluated_samples))
+    save_image(RESULT_PATH + '/test/' + img_ids[id_index] + ".jpg_face.jpg", adv_x[0, :, :, :])
+    id_index += 1
+
 print("Total L2 perturbation summed by channels: ", str(sum(diff_L2) / float(len(diff_L2))))
+
+#evaluate on a new dataset
+result_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE)
+
+evaluate(wrap.model, result_generator)
 
 sess.close()
