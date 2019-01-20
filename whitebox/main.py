@@ -46,7 +46,7 @@ x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE, NUM_OF_CHANN
 y = tf.placeholder(tf.float32, shape=(None, NB_CLASSES))
 
 # evaluate model
-evaluate(model, test_generator, EVAL_BATCH_SIZE)
+#evaluate(model, test_generator, EVAL_BATCH_SIZE)
 
 # pick the attack
 attack = 'fgsm'
@@ -78,23 +78,23 @@ diff_L2 = []
 img_ids = [str("00" + str(i)) for i in range(5613, 7613)]
 id_index = 0
 
-ZERO_LABEL = convert_to_one_hot(0, NB_CLASSES)
-HUNDRED_LABEL = convert_to_one_hot(100, NB_CLASSES)
+TEN_LABEL = convert_to_one_hot(10, NB_CLASSES)
+NINETY_LABEL = convert_to_one_hot(90, NB_CLASSES)
 for legit_sample, legit_label in test_generator:
 
     ground_truth = np.argmax(legit_label)
 
     if ground_truth > 50:
-        adv_x = attack_instance.attack(legit_sample, ZERO_LABEL, attack_instance_graph)
+        adv_x = attack_instance.attack(legit_sample, TEN_LABEL, attack_instance_graph)
     else:
-        adv_x = attack_instance.attack(legit_sample, HUNDRED_LABEL, attack_instance_graph)
+        adv_x = attack_instance.attack(legit_sample, NINETY_LABEL, attack_instance_graph)
 
     diff_L2.append(L2_distance(legit_sample, adv_x))
 
     save_image(RESULT_PATH + '/test/' + img_ids[id_index] + ".jpg_face.jpg", adv_x[0, :, :, :])
     id_index += 1
 
-print("Total L2 perturbation summed by channels: ", str(sum(diff_L2) / float(len(diff_L2))))
+print("Average L2 perturbation summed by channels: ", str(sum(diff_L2) / float(len(diff_L2))))
 
 #evaluate on a new dataset
 result_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE)
