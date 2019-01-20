@@ -1,6 +1,6 @@
 from utils.generator import TestGenerator
-from utils.image_ops import save_results, L2_distance, save_image
-from utils.model_ops import model_argmax, evaluate
+from utils.image_ops import L2_distance, save_image
+from utils.model_ops import evaluate
 from utils.numpy_ops import convert_to_one_hot
 from whitebox.attacks import fgsm, cw, jsma
 
@@ -17,6 +17,7 @@ import random
 random.seed(111)
 
 BATCH_SIZE = 1
+EVAL_BATCH_SIZE = 32
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/github-pretrained.hdf5'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
 IMAGE_SIZE = 224
@@ -45,7 +46,7 @@ x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE, NUM_OF_CHANN
 y = tf.placeholder(tf.float32, shape=(None, NB_CLASSES))
 
 # evaluate model
-evaluate(model, test_generator)
+evaluate(model, test_generator, EVAL_BATCH_SIZE)
 
 # pick the attack
 attack = 'fgsm'
@@ -88,7 +89,6 @@ for legit_sample, legit_label in test_generator:
     else:
         adv_x = attack_instance.attack(legit_sample, HUNDRED_LABEL, attack_instance_graph)
 
-
     diff_L2.append(L2_distance(legit_sample, adv_x))
 
     save_image(RESULT_PATH + '/test/' + img_ids[id_index] + ".jpg_face.jpg", adv_x[0, :, :, :])
@@ -99,6 +99,6 @@ print("Total L2 perturbation summed by channels: ", str(sum(diff_L2) / float(len
 #evaluate on a new dataset
 result_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE)
 
-evaluate(wrap.model, result_generator)
+evaluate(wrap.model, result_generator, EVAL_BATCH_SIZE)
 
 sess.close()

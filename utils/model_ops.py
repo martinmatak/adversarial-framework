@@ -28,8 +28,7 @@ def model_argmax(sess, x, predictions, samples, feed=None):
         return np.argmax(probabilities, axis=1)
 
 
-def evaluate(model, generator):
-    batch_size = 1
+def evaluate(model, generator, batch_size):
 
     # load dataset
     x_tmp, y_tmp = zip(*(generator[i] for i in range(len(generator))))
