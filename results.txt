@@ -2,6 +2,9 @@ fgsm, eps=10: age_mae: 5.362 -> age_mae: 25.366 Average L2 perturbation summed b
 fgsm, eps=5: age_mae: 5.362 -> age_mae: 23.34285102251361 Average L2 perturbation summed by channels:  1889.074982957616
 fgsm (10, 90 as target labels), eps=5, age_mae: 5.362 -> age_mae: 26.1750  Average L2 perturbation summed by channels:  1889.0560840945682
 
+from the dataset above, transferability is like this:
+
+
 
 
 

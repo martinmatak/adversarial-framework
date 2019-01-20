@@ -38,7 +38,7 @@ test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
 evaluate(model, test_generator, EVAL_BATCH_SIZE)
 
 # load adv dataset
-adv_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
+adv_generator = TestGenerator(ADV_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
 
 # evaluate model on adv dataset
 evaluate(model, adv_generator, EVAL_BATCH_SIZE)
