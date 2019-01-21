@@ -12,7 +12,7 @@ random.seed(111)
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
+MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/inceptionResNetV2-3.476-4.149-sgd.hdf5'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
 ADV_SET_PATH = RESULT_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-adv/whitebox/fgsm/'
 IMAGE_SIZE = 224

@@ -1,9 +1,18 @@
+network used: github-pretrained
 fgsm, eps=10: age_mae: 5.362 -> age_mae: 25.366 Average L2 perturbation summed by channels:  3752.3933634143796
 fgsm, eps=5: age_mae: 5.362 -> age_mae: 23.34285102251361 Average L2 perturbation summed by channels:  1889.074982957616
 fgsm (10, 90 as target labels), eps=5, age_mae: 5.362 -> age_mae: 26.1750  Average L2 perturbation summed by channels:  1889.0560840945682
 
 from the dataset above, transferability is like this:
+	resnet50-3.436-5.151-sgd.hdf5 age_mae: 6.018372689026311 -> age_mae: 19.03601661830348
+	resnet50-3.456-6.772-adam.hdf5 age_mae: 7.501610699509947 -> age_mae: 19.186975594190976
+	
+	vgg16-15.494-11.685-adam.hdf5 age_mae: 14.725480284078538 -> age_mae: 14.733128834355828
+	vgg16-16.603-11.255-sgd.hdf5 age_mae: 13.32  -> age_mae: 13.332310838445808
 
+	vgg19 age_mae: 16.84915119861568 -> age_mae: age_mae: 17.54591045106603
+
+	
 
 
 

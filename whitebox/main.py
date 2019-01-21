@@ -13,6 +13,10 @@ import keras
 import tensorflow as tf
 import numpy as np
 import random
+import sys
+
+print('Number of arguments:', len(sys.argv), 'arguments.')
+attack = sys.argv[1]
 
 random.seed(111)
 
@@ -49,7 +53,7 @@ y = tf.placeholder(tf.float32, shape=(None, NB_CLASSES))
 #evaluate(model, test_generator, EVAL_BATCH_SIZE)
 
 # pick the attack
-attack = 'fgsm'
+#attack = 'fgsm'
 #attack = 'cw'
 
 # not working because of memory consumption
