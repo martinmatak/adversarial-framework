@@ -1,6 +1,6 @@
 from utils.generator import TestGenerator
 from utils.image_ops import L2_distance, save_image
-from utils.model_ops import evaluate
+from utils.model_ops import evaluate_generator
 from utils.numpy_ops import convert_to_one_hot
 from whitebox.attacks import fgsm, cw, jsma
 
@@ -15,15 +15,14 @@ import numpy as np
 import random
 import sys
 
-print('Number of arguments:', len(sys.argv), 'arguments.')
-attack = sys.argv[1]
+attack = 'cw'
 
 random.seed(111)
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/github-pretrained.hdf5'
-TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
+TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
@@ -103,6 +102,6 @@ print("Average L2 perturbation summed by channels: ", str(sum(diff_L2) / float(l
 #evaluate on a new dataset
 result_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE)
 
-evaluate(wrap.model, result_generator, EVAL_BATCH_SIZE)
+evaluate_generator(wrap.model, result_generator, EVAL_BATCH_SIZE)
 
 sess.close()

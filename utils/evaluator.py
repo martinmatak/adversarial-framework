@@ -1,5 +1,5 @@
 from utils.generator import TestGenerator
-from utils.model_ops import evaluate
+from utils.model_ops import evaluate_generator
 
 from keras.optimizers import Adam
 from utils.model_ops import age_mae
@@ -35,11 +35,11 @@ print("Model loaded")
 test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
 
 # evaluate model on legit dataset
-evaluate(model, test_generator, EVAL_BATCH_SIZE)
+evaluate_generator(model, test_generator, EVAL_BATCH_SIZE)
 
 # load adv dataset
 adv_generator = TestGenerator(ADV_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
 
 # evaluate model on adv dataset
-evaluate(model, adv_generator, EVAL_BATCH_SIZE)
+evaluate_generator(model, adv_generator, EVAL_BATCH_SIZE)
 

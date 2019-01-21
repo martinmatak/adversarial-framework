@@ -28,17 +28,22 @@ def model_argmax(sess, x, predictions, samples, feed=None):
         return np.argmax(probabilities, axis=1)
 
 
-def evaluate(model, generator, batch_size):
+def evaluate_generator(model, generator, batch_size):
 
     # load dataset
     x_tmp, y_tmp = zip(*(generator[i] for i in range(len(generator))))
     x_test, y_test = np.vstack(x_tmp), np.vstack(y_tmp)
 
     print("Dataset loaded")
+    evaluate(model, x_test, y_test, batch_size)
 
+
+def evaluate(model, x_test, y_test, batch_size):
     result = model.evaluate(x_test, y_test, batch_size, verbose=1)
 
     print(model.metrics_names[1] + ": " + str(result[1]))
+
+
 
 def age_mae(y_true, y_pred):
     true_age = K.sum(y_true * K.arange(0, 101, dtype="float32"), axis=-1)
