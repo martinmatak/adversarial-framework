@@ -35,7 +35,7 @@ class TestGenerator(Sequence):
     def _load_appa(self, appa_dir):
         appa_root = Path(appa_dir)
         val_image_dir = appa_root.joinpath("test")
-        gt_val_path = appa_root.joinpath("gt_avg_test.csv")
+        gt_val_path = appa_root.joinpath("test-small.csv")
         df = pd.read_csv(str(gt_val_path))
 
         for i, row in df.iterrows():

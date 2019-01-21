@@ -4,3 +4,4 @@ venv/
 model/
 results/
 .DS_Store
+models/

@@ -15,14 +15,14 @@ import numpy as np
 import random
 import sys
 
-attack = 'cw'
+attack = 'fgsm'
 
 random.seed(111)
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/github-pretrained.hdf5'
-TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
+MODEL_PATH = '/home/lv71235/mmatak/adversarial-framework/models/resnet50-3.436-5.151-sgd.hdf5'
+TEST_SET_PATH = '/home/lv71235/mmatak/datasets/appa-real-release'
 IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
@@ -58,7 +58,7 @@ y = tf.placeholder(tf.float32, shape=(None, NB_CLASSES))
 # not working because of memory consumption
 #attack = 'jsma'
 
-RESULT_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-adv/whitebox/' + attack
+RESULT_PATH = TEST_SET_PATH + '-adv/whitebox/' + attack
 
 wrap = KerasModelWrapper(model)
 if attack == 'fgsm':
