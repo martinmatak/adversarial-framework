@@ -58,7 +58,7 @@ y = tf.placeholder(tf.float32, shape=(None, NB_CLASSES))
 # not working because of memory consumption
 #attack = 'jsma'
 
-RESULT_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-adv/whitebox/' + attack
+RESULT_PATH = TEST_SET_PATH + '-adv/whitebox/' + attack
 
 wrap = KerasModelWrapper(model)
 if attack == 'fgsm':
