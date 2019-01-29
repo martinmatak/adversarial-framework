@@ -49,7 +49,7 @@ x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE, NUM_OF_CHANN
 y = tf.placeholder(tf.float32, shape=(None, NB_CLASSES))
 
 # evaluate model
-#evaluate(model, test_generator, EVAL_BATCH_SIZE)
+# evaluate(model, test_generator, EVAL_BATCH_SIZE)
 
 # pick the attack
 #attack = 'fgsm'

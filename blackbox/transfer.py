@@ -16,8 +16,7 @@ from six.moves import xrange
 import tensorflow as tf
 
 from cleverhans.attacks import FastGradientMethod
-from cleverhans.utils_tf import jacobian_graph, jacobian_augmentation
-from cleverhans.compat import flags
+from cleverhans.attacks_tf import jacobian_graph, jacobian_augmentation
 from cleverhans.dataset import MNIST
 from cleverhans.initializers import HeReLuNormalInitializer
 from cleverhans.loss import CrossEntropy
@@ -30,12 +29,11 @@ from cleverhans.utils_tf import model_eval, batch_eval
 
 from cleverhans_tutorials.tutorial_models import ModelBasicCNN
 
-FLAGS = flags.FLAGS
 
 NB_CLASSES = 10
 BATCH_SIZE = 128
 LEARNING_RATE = .001
-NB_EPOCHS = 10
+NB_EPOCHS = 2
 HOLDOUT = 150
 DATA_AUG = 6
 NB_EPOCHS_S = 10
@@ -287,36 +285,10 @@ def main(argv=None):
   from cleverhans_tutorials import check_installation
   check_installation(__file__)
 
-  mnist_blackbox(nb_classes=FLAGS.nb_classes, batch_size=FLAGS.batch_size,
-                 learning_rate=FLAGS.learning_rate,
-                 nb_epochs=FLAGS.nb_epochs, holdout=FLAGS.holdout,
-                 data_aug=FLAGS.data_aug, nb_epochs_s=FLAGS.nb_epochs_s,
-                 lmbda=FLAGS.lmbda, aug_batch_size=FLAGS.data_aug_batch_size)
+  mnist_blackbox()
 
 
 if __name__ == '__main__':
 
-  # General flags
-  flags.DEFINE_integer('nb_classes', NB_CLASSES,
-                       'Number of classes in problem')
-  flags.DEFINE_integer('batch_size', BATCH_SIZE,
-                       'Size of training batches')
-  flags.DEFINE_float('learning_rate', LEARNING_RATE,
-                     'Learning rate for training')
-
-  # Flags related to oracle
-  flags.DEFINE_integer('nb_epochs', NB_EPOCHS,
-                       'Number of epochs to train model')
-
-  # Flags related to substitute
-  flags.DEFINE_integer('holdout', HOLDOUT,
-                       'Test set holdout for adversary')
-  flags.DEFINE_integer('data_aug', DATA_AUG,
-                       'Number of substitute data augmentations')
-  flags.DEFINE_integer('nb_epochs_s', NB_EPOCHS_S,
-                       'Training epochs for substitute')
-  flags.DEFINE_float('lmbda', LMBDA, 'Lambda from arxiv.org/abs/1602.02697')
-  flags.DEFINE_integer('data_aug_batch_size', AUG_BATCH_SIZE,
-                       'Batch size for augmentation')
 
   tf.app.run()
