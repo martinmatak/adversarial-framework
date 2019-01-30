@@ -133,7 +133,7 @@ def blackbox(sess):
 
     # simulate the black-box model locally
     print("Preparing the black-box model.")
-    target = prep_bbox(sess)
+    target = prep_bbox()
 
     test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
     # train substitute using method from https://arxiv.org/abs/1602.02697
