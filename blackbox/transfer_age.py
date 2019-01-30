@@ -1,16 +1,24 @@
 import tensorflow as tf
 import keras
 import numpy as np
-from utils.generator import TestGenerator
-from utils.model_ops import evaluate_generator
 from keras.optimizers import Adam
-from utils.model_ops import age_mae
+
+from six.moves import xrange
+
 from keras.models import load_model
+
 from cleverhans.attacks import FastGradientMethod
+from cleverhans.attacks_tf import jacobian_graph, jacobian_augmentation
+from cleverhans.loss import CrossEntropy
 from cleverhans.utils_keras import KerasModelWrapper
+from cleverhans.train import train
+
+
 from whitebox.attacks import fgsm
 from utils.image_ops import L2_distance, save_image
 from utils.numpy_ops import convert_to_one_hot
+from utils.generator import TestGenerator
+from utils.model_ops import evaluate_generator, age_mae, get_compiled_model, get_model, get_dataset
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
@@ -34,13 +42,74 @@ def prep_bbox(sess):
     return wrap
 
 
-def train_sub():
+def bbox_predict(model, data):
+    return [1]
+
+
+def train_sub(data_aug, nb_epochs_s, batch_size, learning_rate, sess,
+              x_sub, y_sub, lmbda, rng, target_model, aug_batch_size=1):
+    """
+
+    :param data_aug:
+    :param nb_epochs_s:
+    :param batch_size:
+    :param learning_rate:
+    :param sess:
+    :param x_sub: initial substitute training data
+    :param y_sub: initial substitute training labels in categorical representation
+    :param rng: numpy.random.RandomState instance
+    :return:
+    """
+    x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE,
+                                          NUM_OF_CHANNELS))
+
+    #TODO: Load fresh model instead
     model = load_model(MODEL_PATH, compile=False)
 
     model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
-    wrap = KerasModelWrapper(model)
-    print("Model loaded")
-    return wrap
+    model_sub = KerasModelWrapper(model)
+
+    preds_sub = model_sub.get_logits(x)
+    loss_sub = CrossEntropy(model_sub, smoothing=0)
+    print("Defined TensorFlow model graph for the substitute.")
+
+    # Define the Jacobian symbolically using TensorFlow
+    #grads = jacobian_graph(preds_sub, x, NB_CLASSES)
+    grads = jacobian_graph(preds_sub, x, NB_CLASSES)
+    print("Defined jacobian graph.")
+
+    for rho in xrange(data_aug):
+        print("Substitute training epoch #" + str(rho))
+        train_params = {
+            'nb_epochs': nb_epochs_s,
+            'batch_size': batch_size,
+            'learning_rate': learning_rate
+        }
+        # TODO: train model using x_sub and y_sub
+        # train(sess, loss_sub, x_sub, y_sub,
+        #       init_all=False, args=train_params, rng=rng,
+        #       var_list=model_sub.get_params())
+        if rho < data_aug - 1:
+
+            print("Augmenting substitute training data")
+            # Perform the Jacobian augmentation
+            lmbda_coef = 2 * int(int(rho / 3) != 0) - 1
+            x_sub = jacobian_augmentation(
+                sess=sess,
+                x=x,
+                X_sub_prev=x_sub,
+                Y_sub=y_sub,
+                grads=grads,
+                lmbda=lmbda_coef*lmbda,
+                aug_batch_size=aug_batch_size
+            )
+
+            print("Labeling substitute training data using bbox.")
+            y_sub = np.hstack([y_sub, y_sub])
+            x_sub_prev = x_sub[int(len(x_sub) / 2):]
+            predictions = bbox_predict(target_model, x_sub_prev)
+            y_sub[int(len(x_sub)/2):] = predictions
+    return model_sub
 
 
 def generate_adv_samples(wrap, generator, sess):
@@ -71,11 +140,7 @@ def generate_adv_samples(wrap, generator, sess):
     print("Average L2 perturbation summed by channels: ", str(sum(diff_L2) / float(len(diff_L2))))
 
 
-def blackbox():
-
-    sess = tf.Session()
-    keras.backend.set_session(sess)
-    print("Session initialized")
+def blackbox(sess):
 
     # Seed random number generator so results are reproducible
     rng = np.random.RandomState([2019, 1, 30])
@@ -84,31 +149,42 @@ def blackbox():
     print("Preparing the black-box model.")
     target = prep_bbox(sess)
 
+    test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
     # train substitute using method from https://arxiv.org/abs/1602.02697
     print("Training the substitute model.")
-    substitute = train_sub()
+    data, labels = get_dataset(test_generator)
+    labels = [np.argmax(label) for label in labels]
+    substitute = train_sub(data_aug=2, nb_epochs_s=1, batch_size=1,
+                           learning_rate=0.01, sess=sess,
+                           x_sub=data, y_sub=labels, rng=rng,
+                           target_model=target, aug_batch_size=1, lmbda=.1)
 
-    test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
-    # evaluate nets on clean test samples
+    print("Evaluating the accuracy of the substitute model on clean examples")
     evaluate_generator(substitute.model, test_generator, EVAL_BATCH_SIZE)
+
+    print("Evaluating the accuracy of the black-box model on clean examples")
     evaluate_generator(target.model, test_generator, EVAL_BATCH_SIZE)
 
-    # generate adv samples
+    print("Generating adversarial samples")
     generate_adv_samples(substitute, test_generator, sess)
 
-    # load adv samples
+    print("Loading adversarial samples")
     result_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE)
 
-    #  Evaluate the accuracy of the substitute model on adversarial examples
+    print("Evaluating the accuracy of the substitute model on adversarial examples")
     evaluate_generator(substitute.model, result_generator, EVAL_BATCH_SIZE)
 
-    # Evaluate the accuracy of the "black-box" model on adversarial examples
+    print("Evaluating the accuracy of the black-box model on adversarial examples")
     evaluate_generator(target.model, result_generator, EVAL_BATCH_SIZE)
 
 
 def main(argv=None):
-    blackbox()
+    sess = tf.Session()
+    #sess.run(tf.global_variables_initializer())
+    keras.backend.set_session(sess)
+    print("Session initialized")
+    blackbox(sess)
 
 
 if __name__ == '__main__':
-    tf.app.run()
+    main()
