@@ -85,3 +85,8 @@ def get_compiled_model(model_name="ResNet50", optimizer=Adam()):
     model = get_model(model_name)
     model.compile(optimizer=optimizer, loss="categorical_crossentropy", metrics=[age_mae])
     return model
+
+
+def train_model(model, sess, data, labels, rng):
+    #TODO: train model based on data and labels
+    return model

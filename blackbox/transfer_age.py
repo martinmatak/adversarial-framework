@@ -9,20 +9,19 @@ from keras.models import load_model
 
 from cleverhans.attacks import FastGradientMethod
 from cleverhans.attacks_tf import jacobian_graph, jacobian_augmentation
-from cleverhans.loss import CrossEntropy
 from cleverhans.utils_keras import KerasModelWrapper
-from cleverhans.train import train
 
 
 from whitebox.attacks import fgsm
 from utils.image_ops import L2_distance, save_image
 from utils.numpy_ops import convert_to_one_hot
 from utils.generator import TestGenerator
-from utils.model_ops import evaluate_generator, age_mae, get_compiled_model, get_model, get_dataset
+from utils.model_ops import evaluate_generator, train_model, age_mae, get_dataset
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
+FRESH_MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.456-6.772-adam.hdf5'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/'
 IMAGE_SIZE = 224
@@ -43,6 +42,7 @@ def prep_bbox(sess):
 
 
 def bbox_predict(model, data):
+    #TODO
     return [1]
 
 
@@ -63,32 +63,21 @@ def train_sub(data_aug, nb_epochs_s, batch_size, learning_rate, sess,
     x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE,
                                           NUM_OF_CHANNELS))
 
-    #TODO: Load fresh model instead
+    #TODO: CREATE fresh model instead, but initialize all variables
     model = load_model(MODEL_PATH, compile=False)
-
     model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
     model_sub = KerasModelWrapper(model)
 
     preds_sub = model_sub.get_logits(x)
-    loss_sub = CrossEntropy(model_sub, smoothing=0)
     print("Defined TensorFlow model graph for the substitute.")
 
     # Define the Jacobian symbolically using TensorFlow
-    #grads = jacobian_graph(preds_sub, x, NB_CLASSES)
     grads = jacobian_graph(preds_sub, x, NB_CLASSES)
     print("Defined jacobian graph.")
 
     for rho in xrange(data_aug):
         print("Substitute training epoch #" + str(rho))
-        train_params = {
-            'nb_epochs': nb_epochs_s,
-            'batch_size': batch_size,
-            'learning_rate': learning_rate
-        }
-        # TODO: train model using x_sub and y_sub
-        # train(sess, loss_sub, x_sub, y_sub,
-        #       init_all=False, args=train_params, rng=rng,
-        #       var_list=model_sub.get_params())
+        train_model(model_sub.model, sess, x_sub, y_sub, rng)
         if rho < data_aug - 1:
 
             print("Augmenting substitute training data")
