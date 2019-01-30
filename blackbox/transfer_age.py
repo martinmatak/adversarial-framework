@@ -16,7 +16,7 @@ from whitebox.attacks import fgsm
 from utils.image_ops import L2_distance, save_image
 from utils.numpy_ops import convert_to_one_hot
 from utils.generator import TestGenerator
-from utils.model_ops import evaluate_generator, train_model, age_mae, get_dataset
+from utils.model_ops import evaluate_generator, train_model, age_mae, get_dataset, model_argmax
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
@@ -29,10 +29,7 @@ NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
 
 
-def prep_bbox(sess):
-    # load model
-    # return model, model.get_logits()
-    # load model
+def prep_bbox():
     model = load_model(MODEL_PATH, compile=False)
 
     model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
@@ -41,9 +38,9 @@ def prep_bbox(sess):
     return wrap
 
 
-def bbox_predict(model, data):
-    #TODO
-    return [1]
+def bbox_predict(model, data, sess, x):
+    # here comes API call or anything similar
+    return model_argmax(sess, x, model.get_logits(x), data)
 
 
 def train_sub(data_aug, nb_epochs_s, batch_size, learning_rate, sess,
@@ -63,8 +60,8 @@ def train_sub(data_aug, nb_epochs_s, batch_size, learning_rate, sess,
     x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE,
                                           NUM_OF_CHANNELS))
 
-    #TODO: CREATE fresh model instead, but initialize all variables
-    model = load_model(MODEL_PATH, compile=False)
+    #TODO: CREATE fresh model instead, but make sure to initialize all variables
+    model = load_model(FRESH_MODEL_PATH, compile=False)
     model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
     model_sub = KerasModelWrapper(model)
 
@@ -77,7 +74,7 @@ def train_sub(data_aug, nb_epochs_s, batch_size, learning_rate, sess,
 
     for rho in xrange(data_aug):
         print("Substitute training epoch #" + str(rho))
-        train_model(model_sub.model, sess, x_sub, y_sub, rng)
+        train_model(model_sub.model, x_sub, y_sub, NB_CLASSES)
         if rho < data_aug - 1:
 
             print("Augmenting substitute training data")
@@ -96,7 +93,7 @@ def train_sub(data_aug, nb_epochs_s, batch_size, learning_rate, sess,
             print("Labeling substitute training data using bbox.")
             y_sub = np.hstack([y_sub, y_sub])
             x_sub_prev = x_sub[int(len(x_sub) / 2):]
-            predictions = bbox_predict(target_model, x_sub_prev)
+            predictions = bbox_predict(target_model, x_sub_prev, sess, x)
             y_sub[int(len(x_sub)/2):] = predictions
     return model_sub
 
@@ -169,7 +166,6 @@ def blackbox(sess):
 
 def main(argv=None):
     sess = tf.Session()
-    #sess.run(tf.global_variables_initializer())
     keras.backend.set_session(sess)
     print("Session initialized")
     blackbox(sess)

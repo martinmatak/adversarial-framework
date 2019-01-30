@@ -4,6 +4,7 @@ from keras.layers import Dense
 from keras.models import Model
 from keras import backend as K
 from keras.optimizers import Adam
+from keras.utils import to_categorical
 
 
 def model_argmax(sess, x, predictions, samples, feed=None):
@@ -81,12 +82,16 @@ def get_model(model_name="ResNet50"):
 
     return model
 
+
 def get_compiled_model(model_name="ResNet50", optimizer=Adam()):
     model = get_model(model_name)
     model.compile(optimizer=optimizer, loss="categorical_crossentropy", metrics=[age_mae])
     return model
 
 
-def train_model(model, sess, data, labels, rng):
-    #TODO: train model based on data and labels
+def train_model(model, data, labels, nb_classes):
+    #TODO
     return model
+    # data = to_categorical(data, nb_classes)
+    # model.fit(x=data, y=labels, batch_size=1)
+    # return model
