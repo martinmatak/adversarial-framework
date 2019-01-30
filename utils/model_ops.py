@@ -90,8 +90,7 @@ def get_compiled_model(model_name="ResNet50", optimizer=Adam()):
 
 
 def train_model(model, data, labels, nb_classes):
-    #TODO
-    return model
-    # data = to_categorical(data, nb_classes)
-    # model.fit(x=data, y=labels, batch_size=1)
     # return model
+    labels = to_categorical(labels, nb_classes)
+    model.fit(x=data, y=labels, batch_size=1)
+    return model

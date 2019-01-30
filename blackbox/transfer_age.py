@@ -69,15 +69,16 @@ def train_sub(data_aug, nb_epochs_s, batch_size, learning_rate, sess,
     print("Defined TensorFlow model graph for the substitute.")
 
     # Define the Jacobian symbolically using TensorFlow
+    print("Defining jacobian graph...")
     grads = jacobian_graph(preds_sub, x, NB_CLASSES)
-    print("Defined jacobian graph.")
+    print("Jacobian graph defined.")
 
     for rho in xrange(data_aug):
         print("Substitute training epoch #" + str(rho))
         train_model(model_sub.model, x_sub, y_sub, NB_CLASSES)
         if rho < data_aug - 1:
 
-            print("Augmenting substitute training data")
+            print("Augmenting substitute training data...")
             # Perform the Jacobian augmentation
             lmbda_coef = 2 * int(int(rho / 3) != 0) - 1
             x_sub = jacobian_augmentation(
@@ -89,6 +90,7 @@ def train_sub(data_aug, nb_epochs_s, batch_size, learning_rate, sess,
                 lmbda=lmbda_coef*lmbda,
                 aug_batch_size=aug_batch_size
             )
+            print("Substitute training data augmented.")
 
             print("Labeling substitute training data using bbox.")
             y_sub = np.hstack([y_sub, y_sub])
@@ -140,7 +142,7 @@ def blackbox(sess):
     print("Training the substitute model.")
     data, labels = get_dataset(test_generator)
     labels = [np.argmax(label) for label in labels]
-    substitute = train_sub(data_aug=2, nb_epochs_s=1, batch_size=1,
+    substitute = train_sub(data_aug=10, nb_epochs_s=20, batch_size=1,
                            learning_rate=0.01, sess=sess,
                            x_sub=data, y_sub=labels, rng=rng,
                            target_model=target, aug_batch_size=1, lmbda=.1)
