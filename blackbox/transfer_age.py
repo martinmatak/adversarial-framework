@@ -21,9 +21,9 @@ from utils.model_ops import evaluate_generator, train_model, age_mae, get_datase
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
-FRESH_MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.456-6.772-adam.hdf5'
+SUBSTITUTE_MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.456-6.772-adam.hdf5'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
-RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/'
+RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/fgsm/'
 IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
@@ -40,11 +40,13 @@ def prep_bbox():
 
 def bbox_predict(model, data, sess, x):
     # here comes API call or anything similar
-    return model_argmax(sess, x, model.get_logits(x), data)
+    predictions = model_argmax(sess, x, model.get_logits(x), data)
+    print("Num of queries to bbox: " + str(len(predictions)))
+    return predictions
 
 
-def train_sub(data_aug, nb_epochs_s, batch_size, learning_rate, sess,
-              x_sub, y_sub, lmbda, rng, target_model, aug_batch_size=1):
+def train_sub(data_aug, sess,
+              x_sub, y_sub, lmbda, target_model, aug_batch_size=1):
     """
 
     :param data_aug:
@@ -60,13 +62,13 @@ def train_sub(data_aug, nb_epochs_s, batch_size, learning_rate, sess,
     x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE,
                                           NUM_OF_CHANNELS))
 
-    #TODO: CREATE fresh model instead, but make sure to initialize all variables
-    model = load_model(FRESH_MODEL_PATH, compile=False)
+    print("Loading substitute model...")
+    model = load_model(SUBSTITUTE_MODEL_PATH, compile=False)
     model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
     model_sub = KerasModelWrapper(model)
 
     preds_sub = model_sub.get_logits(x)
-    print("Defined TensorFlow model graph for the substitute.")
+    print("Subsitute model loaded.")
 
     # Define the Jacobian symbolically using TensorFlow
     print("Defining jacobian graph...")
@@ -77,7 +79,6 @@ def train_sub(data_aug, nb_epochs_s, batch_size, learning_rate, sess,
         print("Substitute training epoch #" + str(rho))
         train_model(model_sub.model, x_sub, y_sub, NB_CLASSES)
         if rho < data_aug - 1:
-
             print("Augmenting substitute training data...")
             # Perform the Jacobian augmentation
             lmbda_coef = 2 * int(int(rho / 3) != 0) - 1
@@ -142,10 +143,9 @@ def blackbox(sess):
     print("Training the substitute model.")
     data, labels = get_dataset(test_generator)
     labels = [np.argmax(label) for label in labels]
-    substitute = train_sub(data_aug=10, nb_epochs_s=20, batch_size=1,
-                           learning_rate=0.01, sess=sess,
-                           x_sub=data, y_sub=labels, rng=rng,
-                           target_model=target, aug_batch_size=1, lmbda=.1)
+    substitute = train_sub(data_aug=10, sess=sess,
+                           x_sub=data, y_sub=labels,
+                           target_model=target, aug_batch_size=4, lmbda=.1)
 
     print("Evaluating the accuracy of the substitute model on clean examples")
     evaluate_generator(substitute.model, test_generator, EVAL_BATCH_SIZE)
