@@ -46,14 +46,16 @@ def prep_bbox():
     return wrap
 
 
-def bbox_predict(model, data, sess, x, batch_size=100):
+def bbox_predict(model, data, sess, x, batch_size=1):
     # here comes API call or anything similar
     print("Num of queries to bbox: " + str(len(data)))
     predictions = model_argmax(sess, x, model.get_logits(x), data[:batch_size])
     data = data[batch_size:]
     while len(data) > 0:
-        predictions += model_argmax(sess, x, model.get_logits(x), data[:batch_size])
-    assert len(predictions) == len(data)
+        predictions_new = model_argmax(sess, x, model.get_logits(x), data[:batch_size])
+        predictions = np.hstack([predictions, predictions_new])
+        data = data[batch_size:]
+        print(predictions)
     return predictions
 
 
