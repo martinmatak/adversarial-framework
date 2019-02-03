@@ -18,12 +18,20 @@ from utils.numpy_ops import convert_to_one_hot
 from utils.generator import TestGenerator
 from utils.model_ops import evaluate_generator, train_model, age_mae, get_dataset, model_argmax
 
-BATCH_SIZE = 1
-EVAL_BATCH_SIZE = 32
+# prototype
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
 SUBSTITUTE_MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.456-6.772-adam.hdf5'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
+
+# paths on remote
+# MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
+# SUBSTITUTE_MODEL_PATH = '/root/age-estimation/checkpoints/vgg16-15.494-11.685-adam.hdf5'
+# TEST_SET_PATH = '/root/datasets/appa-real-release-100'
+
 RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/fgsm/'
+
+BATCH_SIZE = 1
+EVAL_BATCH_SIZE = 32
 IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
@@ -38,10 +46,14 @@ def prep_bbox():
     return wrap
 
 
-def bbox_predict(model, data, sess, x):
+def bbox_predict(model, data, sess, x, batch_size=100):
     # here comes API call or anything similar
-    predictions = model_argmax(sess, x, model.get_logits(x), data)
-    print("Num of queries to bbox: " + str(len(predictions)))
+    print("Num of queries to bbox: " + str(len(data)))
+    predictions = model_argmax(sess, x, model.get_logits(x), data[:batch_size])
+    data = data[batch_size:]
+    while len(data) > 0:
+        predictions += model_argmax(sess, x, model.get_logits(x), data[:batch_size])
+    assert len(predictions) == len(data)
     return predictions
 
 
@@ -93,7 +105,7 @@ def train_sub(data_aug, sess,
             )
             print("Substitute training data augmented.")
 
-            print("Labeling substitute training data using bbox.")
+            print("Labeling substitute training data using bbox...")
             y_sub = np.hstack([y_sub, y_sub])
             x_sub_prev = x_sub[int(len(x_sub) / 2):]
             predictions = bbox_predict(target_model, x_sub_prev, sess, x)
