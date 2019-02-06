@@ -19,14 +19,14 @@ from utils.generator import TestGenerator
 from utils.model_ops import evaluate_generator, train_model, age_mae, get_dataset, model_argmax
 
 # prototype
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
-SUBSTITUTE_MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.456-6.772-adam.hdf5'
-TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
+# MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
+# SUBSTITUTE_MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.456-6.772-adam.hdf5'
+# TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 
 # paths on remote
-# MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
-# SUBSTITUTE_MODEL_PATH = '/root/age-estimation/checkpoints/vgg16-15.494-11.685-adam.hdf5'
-# TEST_SET_PATH = '/root/datasets/appa-real-release-100'
+MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
+SUBSTITUTE_MODEL_PATH = '/root/age-estimation/checkpoints/vgg16-15.494-11.685-adam.hdf5'
+TEST_SET_PATH = '/root/datasets/appa-real-release-100'
 
 RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/fgsm/'
 
@@ -157,7 +157,7 @@ def blackbox(sess):
     print("Training the substitute model.")
     data, labels = get_dataset(test_generator)
     labels = [np.argmax(label) for label in labels]
-    substitute = train_sub(data_aug=10, sess=sess,
+    substitute = train_sub(data_aug=4, sess=sess,
                            x_sub=data, y_sub=labels,
                            target_model=target, aug_batch_size=4, lmbda=.1)
 
