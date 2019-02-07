@@ -55,5 +55,5 @@ def age_mae(y_true, y_pred):
 def train_model(model, data, labels, nb_classes):
     # return model
     labels = to_categorical(labels, nb_classes)
-    model.fit(x=data, y=labels, batch_size=32, epochs=40)
+    model.fit(x=data, y=labels, batch_size=1, epochs=40)
     return model

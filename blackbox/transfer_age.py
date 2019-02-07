@@ -22,17 +22,17 @@ from utils.generator import TestGenerator
 from utils.model_ops import evaluate_generator, train_model, age_mae, get_dataset, model_argmax
 
 # prototype
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
-TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
+#MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
+#TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 
 # paths on remote
-# MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
-# TEST_SET_PATH = '/root/datasets/appa-real-release-100'
+MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
+TEST_SET_PATH = '/root/datasets/appa-real-release-100'
 
 RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/fgsm/'
 
 BATCH_SIZE = 1
-EVAL_BATCH_SIZE = 32
+EVAL_BATCH_SIZE = 1
 IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
