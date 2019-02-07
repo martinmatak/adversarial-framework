@@ -52,14 +52,6 @@ def age_mae(y_true, y_pred):
     return mae
 
 
-def age_mae(y_true, y_pred):
-    true_age = K.sum(y_true * K.arange(0, 101, dtype="float32"), axis=-1)
-    pred_age = K.sum(y_pred * K.arange(0, 101, dtype="float32"), axis=-1)
-    mae = K.mean(K.abs(true_age - pred_age))
-    return mae
-
-
-
 def train_model(model, data, labels, nb_classes):
     # return model
     labels = to_categorical(labels, nb_classes)

@@ -6,6 +6,9 @@ from keras.optimizers import Adam
 from six.moves import xrange
 
 from keras.models import load_model
+from keras.applications import ResNet50, InceptionResNetV2, VGG16, VGG19
+from keras.layers import Dense
+from keras.models import Model
 
 from cleverhans.attacks import FastGradientMethod
 from cleverhans.attacks_tf import jacobian_graph, jacobian_augmentation
@@ -19,14 +22,12 @@ from utils.generator import TestGenerator
 from utils.model_ops import evaluate_generator, train_model, age_mae, get_dataset, model_argmax
 
 # prototype
-# MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
-# SUBSTITUTE_MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.456-6.772-adam.hdf5'
-# TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
+MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
+TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 
 # paths on remote
-MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
-SUBSTITUTE_MODEL_PATH = '/root/age-estimation/checkpoints/vgg16-15.494-11.685-adam.hdf5'
-TEST_SET_PATH = '/root/datasets/appa-real-release-100'
+# MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
+# TEST_SET_PATH = '/root/datasets/appa-real-release-100'
 
 RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/fgsm/'
 
@@ -35,6 +36,21 @@ EVAL_BATCH_SIZE = 32
 IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
+
+def get_model(model_name="ResNet50"):
+    base_model = None
+
+    if model_name == "ResNet50":
+        base_model = ResNet50(include_top=False, weights='imagenet', input_shape=(224, 224, 3), pooling="avg")
+    elif model_name == "VGG16":
+        base_model = VGG16(include_top=False, weights='imagenet', input_shape=(224, 224, 3), pooling="avg")
+
+    prediction = Dense(units=101, kernel_initializer="he_normal", use_bias=False, activation="softmax",
+                       name="pred_age")(base_model.output)
+
+    model = Model(inputs=base_model.input, outputs=prediction)
+
+    return model
 
 
 def prep_bbox():
@@ -55,7 +71,7 @@ def bbox_predict(model, data, sess, x, batch_size=1):
         predictions_new = model_argmax(sess, x, model.get_logits(x), data[:batch_size])
         predictions = np.hstack([predictions, predictions_new])
         data = data[batch_size:]
-        print(predictions)
+    print(predictions)
     return predictions
 
 
@@ -77,7 +93,7 @@ def train_sub(data_aug, sess,
                                           NUM_OF_CHANNELS))
 
     print("Loading substitute model...")
-    model = load_model(SUBSTITUTE_MODEL_PATH, compile=False)
+    model = get_model()
     model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
     model_sub = KerasModelWrapper(model)
 
