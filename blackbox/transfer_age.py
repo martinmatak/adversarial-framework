@@ -105,10 +105,10 @@ def train_sub(data_aug, sess,
     grads = jacobian_graph(preds_sub, x, NB_CLASSES)
     print("Jacobian graph defined.")
 
-    train_gen = TransferGenerator(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE, decoding_needed=False)
+    train_gen = TransferGenerator(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE)
     for rho in xrange(data_aug):
         print("Substitute training epoch #" + str(rho))
-        train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE, decoding_needed=False)
+        train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE)
         model_sub.model.fit_generator(generator=train_gen, epochs=40)
         if rho < data_aug - 1:
             print("Augmenting substitute training data...")

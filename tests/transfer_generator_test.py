@@ -40,9 +40,8 @@ test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
 
 x_data, y_data = get_dataset(test_generator)
 
-y_classes = [np.argmax(y, axis=None, out=None) for y in y_data]
 
-new_generator = TransferGenerator(x_data, y_classes, BATCH_SIZE, IMAGE_SIZE)
+new_generator = TransferGenerator(x_data, y_data, BATCH_SIZE, IMAGE_SIZE)
 
 #evaluate_generator(model, new_generator, EVAL_BATCH_SIZE)
 
