@@ -102,7 +102,7 @@ def train_sub(data_aug, sess,
 
     # Define the Jacobian symbolically using TensorFlow
     print("Defining jacobian graph...")
-    #grads = jacobian_graph(preds_sub, x, NB_CLASSES)
+    grads = jacobian_graph(preds_sub, x, NB_CLASSES)
     print("Jacobian graph defined.")
 
     train_gen = TransferGenerator(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE, encoding_needed=False)
