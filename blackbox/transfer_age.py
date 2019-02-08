@@ -102,13 +102,13 @@ def train_sub(data_aug, sess,
 
     # Define the Jacobian symbolically using TensorFlow
     print("Defining jacobian graph...")
-    grads = jacobian_graph(preds_sub, x, NB_CLASSES)
+    #grads = jacobian_graph(preds_sub, x, NB_CLASSES)
     print("Jacobian graph defined.")
 
-    train_gen = TransferGenerator(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE)
+    train_gen = TransferGenerator(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE, encoding_needed=False)
     for rho in xrange(data_aug):
         print("Substitute training epoch #" + str(rho))
-        train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE)
+        train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE, encoding_needed=False)
         model_sub.model.fit_generator(generator=train_gen, epochs=40)
         if rho < data_aug - 1:
             print("Augmenting substitute training data...")
@@ -174,6 +174,8 @@ def blackbox(sess):
     # train substitute using method from https://arxiv.org/abs/1602.02697
     print("Training the substitute model.")
     data, labels = get_dataset(test_generator)
+    labels = [np.argmax(label, axis=None, out=None) for label in labels]
+
     substitute = train_sub(data_aug=4, sess=sess,
                            x_sub=data, y_sub=labels,
                            target_model=target, aug_batch_size=4, lmbda=.1)
