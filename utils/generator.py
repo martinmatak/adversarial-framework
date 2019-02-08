@@ -47,6 +47,28 @@ class TestGenerator(Sequence):
                 self.image_path_and_age.append([str(image_path), age])
 
 
+class TransferGenerator(Sequence):
+
+    def __init__(self, x, y, batch_size=32, image_size=224):
+        self.data = x
+        self.labels = y
+        self.image_num = len(y)
+        self.batch_size = batch_size
+        self.image_size = image_size
+
+    def __len__(self):
+        return self.image_num // self.batch_size
+
+    def __getitem__(self, idx):
+        batch_size = self.batch_size
+        image_size = self.image_size
+        x = np.zeros((batch_size, image_size, image_size, 3), dtype=np.uint8)
+        y = np.zeros((batch_size, 1), dtype=np.int32)
+        for i in range(batch_size):
+            x[i] = self.data[idx*batch_size + i]
+            y[i] = self.labels[idx*batch_size + i]
+        return x, to_categorical(y, 101)
+
 # class TargetGenerator(Sequence):
 #     """
 #     Returns an image and target label
