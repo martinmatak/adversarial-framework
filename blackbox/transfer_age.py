@@ -6,7 +6,7 @@ from keras.optimizers import Adam
 from six.moves import xrange
 
 from keras.models import load_model
-from keras.applications import ResNet50, InceptionResNetV2, VGG16, VGG19
+from keras.applications import ResNet50, VGG16
 from keras.layers import Dense
 from keras.models import Model
 
@@ -18,16 +18,16 @@ from cleverhans.utils_keras import KerasModelWrapper
 from whitebox.attacks import fgsm
 from utils.image_ops import L2_distance, save_image
 from utils.numpy_ops import convert_to_one_hot
-from utils.generator import TestGenerator
+from utils.generator import TestGenerator, TransferGenerator
 from utils.model_ops import evaluate_generator, train_model, age_mae, get_dataset, model_argmax
 
 # prototype
-#MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
-#TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
+MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
+TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-overfit'
 
 # paths on remote
-MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
-TEST_SET_PATH = '/root/datasets/appa-real-release-100'
+#MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
+#TEST_SET_PATH = '/root/datasets/appa-real-release-100'
 
 RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/fgsm/'
 
@@ -105,9 +105,11 @@ def train_sub(data_aug, sess,
     grads = jacobian_graph(preds_sub, x, NB_CLASSES)
     print("Jacobian graph defined.")
 
+    train_gen = TransferGenerator(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE, decoding_needed=False)
     for rho in xrange(data_aug):
         print("Substitute training epoch #" + str(rho))
-        train_model(model_sub.model, x_sub, y_sub, NB_CLASSES)
+        train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE, decoding_needed=False)
+        model_sub.model.fit_generator(generator=train_gen, epochs=40)
         if rho < data_aug - 1:
             print("Augmenting substitute training data...")
             # Perform the Jacobian augmentation
@@ -172,7 +174,6 @@ def blackbox(sess):
     # train substitute using method from https://arxiv.org/abs/1602.02697
     print("Training the substitute model.")
     data, labels = get_dataset(test_generator)
-    labels = [np.argmax(label) for label in labels]
     substitute = train_sub(data_aug=4, sess=sess,
                            x_sub=data, y_sub=labels,
                            target_model=target, aug_batch_size=4, lmbda=.1)

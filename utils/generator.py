@@ -49,10 +49,14 @@ class TestGenerator(Sequence):
 
 class TransferGenerator(Sequence):
 
-    def __init__(self, x, y, batch_size=32, image_size=224):
-        self.data = x
-        self.labels = y
-        self.image_num = len(y)
+    def __init__(self, data, labels, batch_size=32, image_size=224, decoding_needed=False):
+        self.data = data
+        if decoding_needed:
+            self.labels = [np.argmax(label, axis=None, out=None) for label in labels]
+        else:
+            self.labels = labels
+        self.labels = labels
+        self.image_num = len(labels)
         self.batch_size = batch_size
         self.image_size = image_size
 
@@ -68,6 +72,19 @@ class TransferGenerator(Sequence):
             x[i] = self.data[idx*batch_size + i]
             y[i] = self.labels[idx*batch_size + i]
         return x, to_categorical(y, 101)
+
+    def reinitialize(self, data, labels, batch_size=32, image_size=224, decoding_needed=False):
+        # if labels are one-hot encoded, decoding is needed
+        self.data = data
+        if decoding_needed:
+            self.labels = [np.argmax(label, axis=None, out=None) for label in labels]
+        else:
+            self.labels = labels
+        self.labels = labels
+        self.image_num = len(labels)
+        self.batch_size = batch_size
+        self.image_size = image_size
+
 
 # class TargetGenerator(Sequence):
 #     """
