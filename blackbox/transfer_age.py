@@ -77,18 +77,6 @@ def bbox_predict(model, data, sess, x, batch_size=1):
 
 def train_sub(data_aug, sess,
               x_sub, y_sub, lmbda, target_model, aug_batch_size=1):
-    """
-
-    :param data_aug:
-    :param nb_epochs_s:
-    :param batch_size:
-    :param learning_rate:
-    :param sess:
-    :param x_sub: initial substitute training data
-    :param y_sub: initial substitute training labels in categorical representation
-    :param rng: numpy.random.RandomState instance
-    :return:
-    """
     x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE,
                                           NUM_OF_CHANNELS))
 
@@ -142,6 +130,28 @@ def train_sub(data_aug, sess,
             y_sub[int(len(x_sub)/2):] = predictions
     return model_sub
 
+def train_sub_no_augmn(data, target_model, sess):
+    print("Loading a substitute model...")
+
+    x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE, NUM_OF_CHANNELS))
+
+    model = get_model()
+    model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
+    model_sub = KerasModelWrapper(model)
+
+    print("Substitute model loaded")
+
+    print("Labeling samples...")
+    labels = bbox_predict(target_model, data, sess, x, batch_size=1)
+    print("Samples labeled")
+
+
+    print("Training a substitute model...")
+    train_gen = TransferGenerator(data, labels , BATCH_SIZE, IMAGE_SIZE, encoding_needed=False)
+    model_sub.model.fit_generator(generator=train_gen, epochs=1)
+    print("Subsitute model trained")
+
+    return model_sub
 
 def generate_adv_samples(wrap, generator, sess):
     attack_instance_graph = FastGradientMethod(wrap, sess)
@@ -186,26 +196,28 @@ def blackbox(sess):
     data, labels = get_dataset(test_generator)
     labels = [np.argmax(label, axis=None, out=None) for label in labels]
 
-    substitute = train_sub(data_aug=4, sess=sess,
-                           x_sub=data, y_sub=labels,
-                           target_model=target, aug_batch_size=4, lmbda=.1)
+    # substitute = train_sub(data_aug=4, sess=sess,
+    #                        x_sub=data, y_sub=labels,
+    #                        target_model=target, aug_batch_size=4, lmbda=.1)
 
-    print("Evaluating the accuracy of the substitute model on clean examples")
+    substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
+
+    print("Evaluating the accuracy of the substitute model on clean examples...")
     evaluate_generator(substitute.model, test_generator, EVAL_BATCH_SIZE)
 
-    print("Evaluating the accuracy of the black-box model on clean examples")
+    print("Evaluating the accuracy of the black-box model on clean examples...")
     evaluate_generator(target.model, test_generator, EVAL_BATCH_SIZE)
 
-    print("Generating adversarial samples")
+    print("Generating adversarial samples...")
     generate_adv_samples(substitute, test_generator, sess)
 
-    print("Loading adversarial samples")
+    print("Loading adversarial samples...")
     result_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE)
 
-    print("Evaluating the accuracy of the substitute model on adversarial examples")
+    print("Evaluating the accuracy of the substitute model on adversarial examples...")
     evaluate_generator(substitute.model, result_generator, EVAL_BATCH_SIZE)
 
-    print("Evaluating the accuracy of the black-box model on adversarial examples")
+    print("Evaluating the accuracy of the black-box model on adversarial examples...")
     evaluate_generator(target.model, result_generator, EVAL_BATCH_SIZE)
 
 
