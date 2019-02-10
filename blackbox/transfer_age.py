@@ -21,13 +21,22 @@ from utils.numpy_ops import convert_to_one_hot
 from utils.generator import TestGenerator, TransferGenerator
 from utils.model_ops import evaluate_generator, train_model, age_mae, get_dataset, model_argmax
 
-# prototype
+# prototype constants
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
-TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-overfit'
+TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-2'
+TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
+NUM_EPOCHS = 1
+ADV_ID_START = 5615
+ADV_ID_END = 7613
 
-# paths on remote
+# remote constants
 #MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
+#TRAINING_SET_PATH = '/root/datasets/appa-real-release-1000'
 #TEST_SET_PATH = '/root/datasets/appa-real-release-100'
+#NUM_EPOCHS = 40
+#ADV_ID_START = 5613
+#ADV_ID_END = 7613
+
 
 RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/fgsm/'
 
@@ -148,7 +157,7 @@ def train_sub_no_augmn(data, target_model, sess):
 
     print("Training a substitute model...")
     train_gen = TransferGenerator(data, labels , BATCH_SIZE, IMAGE_SIZE, encoding_needed=False)
-    model_sub.model.fit_generator(generator=train_gen, epochs=1)
+    model_sub.model.fit_generator(generator=train_gen, epochs=NUM_EPOCHS)
     print("Subsitute model trained")
 
     return model_sub
@@ -159,7 +168,7 @@ def generate_adv_samples(wrap, generator, sess):
 
     diff_L2 = []
 
-    img_ids = [str("00" + str(i)) for i in range(5613, 7613)]
+    img_ids = [str("00" + str(i)) for i in range(ADV_ID_START, ADV_ID_END)]
     id_index = 0
 
     TEN_LABEL = convert_to_one_hot(10, NB_CLASSES)
@@ -190,19 +199,13 @@ def blackbox(sess):
     print("Preparing the black-box model.")
     target = prep_bbox()
 
-    test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
     # train substitute using method from https://arxiv.org/abs/1602.02697
-    print("Training the substitute model.")
-    data, labels = get_dataset(test_generator)
-    labels = [np.argmax(label, axis=None, out=None) for label in labels]
-
-    # substitute = train_sub(data_aug=4, sess=sess,
-    #                        x_sub=data, y_sub=labels,
-    #                        target_model=target, aug_batch_size=4, lmbda=.1)
-
+    print("Training the substitute model by querying the target network..")
+    data, _ = get_dataset(TestGenerator(TRAINING_SET_PATH, BATCH_SIZE, IMAGE_SIZE))
     substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
+    test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
     evaluate_generator(substitute.model, test_generator, EVAL_BATCH_SIZE)
 
     print("Evaluating the accuracy of the black-box model on clean examples...")
