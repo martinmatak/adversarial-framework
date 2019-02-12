@@ -3,6 +3,7 @@ import keras
 import numpy as np
 from utils.generator import TestGenerator
 from utils.model_ops import age_mae
+from utils.image_ops import L2_distance, save_image
 from keras.models import load_model
 from keras.optimizers import Adam
 
@@ -32,12 +33,18 @@ image_source = image_source[0].astype(np.float32)
 image_target = image_target[0].astype(np.float32)
 
 # obtain target label
-attack = foolbox.attacks.BoundaryAttack(fmodel)
+label_source = int(np.argmax(fmodel.predictions(image_source)))
 label_target = int(np.argmax(fmodel.predictions(image_target)))
-print("source label: " + str(int(np.argmax(fmodel.predictions(image_source)))))
+
+print("source label: " + str(label_source))
 print("target label: " + str(label_target))
 
-adversarial = attack(input_or_adv=image_target, label=label_target, starting_point=image_source, verbose=True, iterations=5)
+
+attack = foolbox.attacks.BoundaryAttack(fmodel, criterion=foolbox.criteria.TargetClass(label_target))
+adversarial = attack(input_or_adv=image_source, label=1, starting_point=image_target, verbose=True, iterations=5000)
+
+save_image("/Users/mmatak/dev/thesis/adversarial_framework/results/image.jpg", adversarial[:, :, :])
+
 # if the attack fails, adversarial will be None and a warning will be printed
 print("label of adversarial sample: " + str(int(np.argmax(fmodel.predictions(adversarial)))))
 import matplotlib.pyplot as plt

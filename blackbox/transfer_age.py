@@ -19,7 +19,7 @@ from whitebox.attacks import fgsm
 from utils.image_ops import L2_distance, save_image
 from utils.numpy_ops import convert_to_one_hot
 from utils.generator import TestGenerator, TransferGenerator
-from utils.model_ops import evaluate_generator, train_model, age_mae, get_dataset, model_argmax
+from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax
 
 # prototype constants
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
