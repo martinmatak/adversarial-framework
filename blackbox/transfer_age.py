@@ -10,12 +10,12 @@ from keras.applications import ResNet50, VGG16
 from keras.layers import Dense
 from keras.models import Model
 
-from cleverhans.attacks import FastGradientMethod
+from cleverhans.attacks import FastGradientMethod,  CarliniWagnerL2
 from cleverhans.attacks_tf import jacobian_graph, jacobian_augmentation
 from cleverhans.utils_keras import KerasModelWrapper
 
 
-from whitebox.attacks import fgsm
+from whitebox.attacks import fgsm, cw
 from utils.image_ops import L2_distance, save_image
 from utils.numpy_ops import convert_to_one_hot
 from utils.generator import TestGenerator, TransferGenerator
@@ -38,7 +38,7 @@ ADV_ID_END = 7613
 #ADV_ID_END = 7613
 
 
-RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/fgsm/'
+RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/cw/'
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1
@@ -163,8 +163,10 @@ def train_sub_no_augmn(data, target_model, sess):
     return model_sub
 
 def generate_adv_samples(wrap, generator, sess):
-    attack_instance_graph = FastGradientMethod(wrap, sess)
-    attack_instance = fgsm
+    #attack_instance_graph = FastGradientMethod(wrap, sess)
+    #attack_instance = fgsm
+    attack_instance_graph = CarliniWagnerL2(wrap, sess)
+    attack_instance = cw
 
     diff_L2 = []
 
@@ -201,8 +203,10 @@ def blackbox(sess):
 
     # train substitute using method from https://arxiv.org/abs/1602.02697
     print("Training the substitute model by querying the target network..")
-    data, _ = get_dataset(TestGenerator(TRAINING_SET_PATH, BATCH_SIZE, IMAGE_SIZE))
-    substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
+    data, labels = get_dataset(TestGenerator(TRAINING_SET_PATH, BATCH_SIZE, IMAGE_SIZE))
+    #substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
+    labels = [np.argmax(label, axis=None, out=None) for label in labels]
+    substitute = train_sub(data_aug=4, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
     test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)

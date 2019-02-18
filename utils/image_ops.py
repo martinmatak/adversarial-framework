@@ -12,24 +12,12 @@ def save_results(adv_x, attack_type, attack_name, successful, original_class, ta
 def save_image(path, image):
     cv2.imwrite(path, image)
 
-# def L0_distance(image_a, image_b):
-#     return L_distance(image_a, image_b, 0)
-#
-#
-# def L1_distance(image_a, image_b):
-#     return L_distance(image_a, image_b, 1)
-#
+
+def load_image(image_path, image_size):
+    print("Loading ", image_path)
+    image = cv2.imread(str(image_path))
+    return cv2.resize(image, (image_size, image_size))
+
 
 def L2_distance(image_a, image_b):
     return np.sum((image_a-image_b)**2)**.5
-
-
-# def Linf_distance(image_a, image_b):
-#     return L_distance(image_a, image_b, np.inf)
-#
-#
-# def L_distance(image_a, image_b, order):
-#     diff = image_a - image_b
-#     return np.linalg.norm(diff, ord=order, axis=1) \
-#            + np.linalg.norm(diff, ord=order, axis=2) \
-#            + np.linalg.norm(diff, ord=order, axis=3)
