@@ -21,3 +21,10 @@ def load_image(image_path, image_size):
 
 def L2_distance(image_a, image_b):
     return np.sum((image_a-image_b)**2)**.5
+
+
+def resize_images(images, dimension):
+    resized_images = np.zeros((len(images), dimension, dimension, 3), dtype=np.uint8)
+    for index, sample in enumerate(images):
+        resized_images[index] = cv2.resize(sample, (dimension, dimension))
+    return resized_images

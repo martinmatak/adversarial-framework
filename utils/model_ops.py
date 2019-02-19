@@ -2,8 +2,9 @@ import numpy as np
 from keras import backend as K
 from keras.utils import to_categorical
 from keras.applications import ResNet50, VGG16
-from keras.layers import Dense
-from keras.models import Model
+from keras.layers import Dense, Flatten, Activation, Conv2D, MaxPooling2D, Dropout
+from keras.models import Model, Sequential
+from keras.optimizers import rmsprop
 
 
 def model_argmax(sess, x, predictions, samples, feed=None):
@@ -79,11 +80,36 @@ def get_model(model_name="ResNet50"):
     return model
 
 
-def get_simple_model(nb_units):
-    base_model = ResNet50(include_top=False, weights='imagenet', input_shape=(224, 224, 3), pooling="avg")
-    prediction = Dense(units=nb_units, kernel_initializer="he_normal", use_bias=False, activation="softmax",
-                       name="pred_age")(base_model.output)
-    model = Model(inputs=base_model.input, outputs=prediction)
+def get_simple_model(num_classes):
+    model = Sequential()
+    model.add(Conv2D(32, (3, 3), padding='same', input_shape=(32, 32, 3)))
+    model.add(Activation('relu'))
+    model.add(Conv2D(32, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+
+    model.add(Conv2D(64, (3, 3), padding='same'))
+    model.add(Activation('relu'))
+    model.add(Conv2D(64, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+
+    model.add(Flatten())
+    model.add(Dense(512))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(num_classes))
+    model.add(Activation('softmax'))
+
+    # initiate RMSprop optimizer
+    opt = rmsprop(lr=0.0001, decay=1e-6)
+
+    # Let's train the model using RMSprop
+    model.compile(loss='categorical_crossentropy',
+                  optimizer=opt,
+                  metrics=['accuracy'])
     return model
 
 
