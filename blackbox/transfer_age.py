@@ -188,7 +188,7 @@ def blackbox(sess):
     data, labels = get_dataset(TestGenerator(TRAINING_SET_PATH, BATCH_SIZE, IMAGE_SIZE))
     #substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
     labels = [np.argmax(label, axis=None, out=None) for label in labels]
-    substitute = train_sub(data_aug=4, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
+    substitute = train_sub(data_aug=6, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
     test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)

@@ -72,7 +72,7 @@ class TransferGenerator(Sequence):
         for i in range(batch_size):
             x[i] = self.data[idx*batch_size + i]
             label = self.labels[idx*batch_size + i]
-            y[i] = int(max(label, 99) / int(101/self.num_classes))
+            y[i] = int(min(label, 99) / int(101/self.num_classes))
 
         return x, to_categorical(y, num_classes=self.num_classes)
 

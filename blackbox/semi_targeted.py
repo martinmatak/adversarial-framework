@@ -20,7 +20,7 @@ from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argm
 
 # prototype constants
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
-TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-2'
+TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
 NUM_EPOCHS = 1
 ADV_ID_START = 5615
@@ -56,7 +56,10 @@ def prep_bbox():
 def post_process_predictions(predictions):
     post_process_predictions = np.copy(predictions)
     for index, label in enumerate(predictions):
-        post_process_predictions[index] = int(max(label, 99) / int(101/NB_SUB_CLASSES))
+        #print("label: ", label)
+        new_label = int(min(label, 99) / int(101/NB_SUB_CLASSES))
+        #print("new label: ", new_label)
+        post_process_predictions[index] = new_label
     return post_process_predictions
 
 
@@ -202,7 +205,7 @@ def blackbox(sess):
     #substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
     labels = [np.argmax(label, axis=None, out=None) for label in labels]
     labels = [int(label / int(101/NB_SUB_CLASSES)) for label in labels]
-    substitute = train_sub(data_aug=4, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
+    substitute = train_sub(data_aug=6, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
     print("skipped")
