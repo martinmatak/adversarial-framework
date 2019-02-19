@@ -1,6 +1,9 @@
 import numpy as np
 from keras import backend as K
 from keras.utils import to_categorical
+from keras.applications import ResNet50, VGG16
+from keras.layers import Dense
+from keras.models import Model
 
 
 def model_argmax(sess, x, predictions, samples, feed=None):
@@ -34,6 +37,7 @@ def get_dataset(generator):
 
     return x_test, y_test
 
+
 def evaluate_generator(model, generator, batch_size):
     x_test, y_test = get_dataset(generator)
     evaluate(model, x_test, y_test, batch_size)
@@ -43,6 +47,7 @@ def evaluate(model, x_test, y_test, batch_size):
     result = model.evaluate(x_test, y_test, batch_size, verbose=1)
 
     print(model.metrics_names[1] + ": " + str(result[1]))
+
 
 def age_mae(y_true, y_pred):
     true_age = K.sum(y_true * K.arange(0, 101, dtype="float32"), axis=-1)
@@ -56,4 +61,30 @@ def train_model(model, data, labels, nb_classes):
     labels = to_categorical(labels, nb_classes)
     model.fit(x=data, y=labels, batch_size=1, epochs=40)
     return model
+
+
+def get_model(model_name="ResNet50"):
+    base_model = None
+
+    if model_name == "ResNet50":
+        base_model = ResNet50(include_top=False, weights='imagenet', input_shape=(224, 224, 3), pooling="avg")
+    elif model_name == "VGG16":
+        base_model = VGG16(include_top=False, weights='imagenet', input_shape=(224, 224, 3), pooling="avg")
+
+    prediction = Dense(units=101, kernel_initializer="he_normal", use_bias=False, activation="softmax",
+                       name="pred_age")(base_model.output)
+
+    model = Model(inputs=base_model.input, outputs=prediction)
+
+    return model
+
+
+def get_simple_model(nb_units):
+    base_model = ResNet50(include_top=False, weights='imagenet', input_shape=(224, 224, 3), pooling="avg")
+    prediction = Dense(units=nb_units, kernel_initializer="he_normal", use_bias=False, activation="softmax",
+                       name="pred_age")(base_model.output)
+    model = Model(inputs=base_model.input, outputs=prediction)
+    return model
+
+
 

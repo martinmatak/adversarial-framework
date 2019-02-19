@@ -16,7 +16,7 @@ from whitebox.attacks import fgsm, cw
 from utils.image_ops import L2_distance, save_image
 from utils.numpy_ops import convert_to_one_hot
 from utils.generator import TestGenerator, TransferGenerator
-from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_model
+from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_simple_model, get_model
 
 # prototype constants
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
@@ -25,6 +25,7 @@ TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
 NUM_EPOCHS = 1
 ADV_ID_START = 5615
 ADV_ID_END = 7613
+NB_SUB_CLASSES = 4
 
 # remote constants
 #MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
@@ -34,8 +35,8 @@ ADV_ID_END = 7613
 #ADV_ID_START = 5613
 #ADV_ID_END = 7613
 
-
-RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/cw/'
+ATTACK_NAME = 'fgsm'
+RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/' + ATTACK_NAME + '/'
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1
@@ -46,11 +47,17 @@ NB_CLASSES = 101
 
 def prep_bbox():
     model = load_model(MODEL_PATH, compile=False)
-
     model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
     wrap = KerasModelWrapper(model)
     print("Model loaded")
     return wrap
+
+
+def post_process_predictions(predictions):
+    post_process_predictions = np.copy(predictions)
+    for index, label in enumerate(predictions):
+        post_process_predictions[index] = int(max(label, 99) / int(101/NB_SUB_CLASSES))
+    return post_process_predictions
 
 
 def bbox_predict(model, data, sess, x, batch_size=1):
@@ -63,7 +70,9 @@ def bbox_predict(model, data, sess, x, batch_size=1):
         predictions = np.hstack([predictions, predictions_new])
         data = data[batch_size:]
     print(predictions)
-    return predictions
+    post_processed_predictions = post_process_predictions(predictions)
+    print(post_processed_predictions)
+    return post_processed_predictions
 
 
 def train_sub(data_aug, sess,
@@ -72,8 +81,8 @@ def train_sub(data_aug, sess,
                                           NUM_OF_CHANNELS))
 
     print("Loading substitute model...")
-    model = get_model()
-    model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
+    model = get_simple_model(NB_SUB_CLASSES)
+    model.compile(optimizer=Adam(), loss="categorical_crossentropy")
     model_sub = KerasModelWrapper(model)
 
     preds_sub = model_sub.get_logits(x)
@@ -81,10 +90,10 @@ def train_sub(data_aug, sess,
 
     # Define the Jacobian symbolically using TensorFlow
     print("Defining jacobian graph...")
-    grads = jacobian_graph(preds_sub, x, NB_CLASSES)
+    grads = jacobian_graph(preds_sub, x, NB_SUB_CLASSES)
     print("Jacobian graph defined.")
 
-    train_gen = TransferGenerator(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE, encoding_needed=False)
+    train_gen = TransferGenerator(x_sub, y_sub, num_classes=NB_SUB_CLASSES, batch_size=BATCH_SIZE, image_size=IMAGE_SIZE, encoding_needed=False)
     for rho in xrange(data_aug):
         print("Substitute training epoch #" + str(rho))
         train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE, encoding_needed=False)
@@ -121,6 +130,7 @@ def train_sub(data_aug, sess,
             y_sub[int(len(x_sub)/2):] = predictions
     return model_sub
 
+
 def train_sub_no_augmn(data, target_model, sess):
     print("Loading a substitute model...")
 
@@ -144,19 +154,22 @@ def train_sub_no_augmn(data, target_model, sess):
 
     return model_sub
 
+
 def generate_adv_samples(wrap, generator, sess):
-    #attack_instance_graph = FastGradientMethod(wrap, sess)
-    #attack_instance = fgsm
-    attack_instance_graph = CarliniWagnerL2(wrap, sess)
-    attack_instance = cw
+    if ATTACK_NAME == 'fgsm':
+        attack_instance_graph = FastGradientMethod(wrap, sess)
+        attack_instance = fgsm
+    else:
+        attack_instance_graph = CarliniWagnerL2(wrap, sess)
+        attack_instance = cw
 
     diff_L2 = []
 
     img_ids = [str("00" + str(i)) for i in range(ADV_ID_START, ADV_ID_END)]
     id_index = 0
 
-    TEN_LABEL = convert_to_one_hot(10, NB_CLASSES)
-    NINETY_LABEL = convert_to_one_hot(90, NB_CLASSES)
+    TEN_LABEL = convert_to_one_hot(0, NB_SUB_CLASSES)
+    NINETY_LABEL = convert_to_one_hot(3, NB_SUB_CLASSES)
     for legit_sample, legit_label in generator:
 
         ground_truth = np.argmax(legit_label)
@@ -188,13 +201,15 @@ def blackbox(sess):
     data, labels = get_dataset(TestGenerator(TRAINING_SET_PATH, BATCH_SIZE, IMAGE_SIZE))
     #substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
     labels = [np.argmax(label, axis=None, out=None) for label in labels]
+    labels = [int(label / int(101/NB_SUB_CLASSES)) for label in labels]
     substitute = train_sub(data_aug=4, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
-    test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
-    evaluate_generator(substitute.model, test_generator, EVAL_BATCH_SIZE)
+    print("skipped")
+    #evaluate_generator(substitute.model, test_generator, EVAL_BATCH_SIZE)
 
     print("Evaluating the accuracy of the black-box model on clean examples...")
+    test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
     evaluate_generator(target.model, test_generator, EVAL_BATCH_SIZE)
 
     print("Generating adversarial samples...")
@@ -204,7 +219,8 @@ def blackbox(sess):
     result_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE)
 
     print("Evaluating the accuracy of the substitute model on adversarial examples...")
-    evaluate_generator(substitute.model, result_generator, EVAL_BATCH_SIZE)
+    print("skipped")
+    #evaluate_generator(substitute.model, result_generator, EVAL_BATCH_SIZE)
 
     print("Evaluating the accuracy of the black-box model on adversarial examples...")
     evaluate_generator(target.model, result_generator, EVAL_BATCH_SIZE)
