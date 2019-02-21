@@ -112,5 +112,12 @@ def get_simple_model(num_classes):
                   metrics=['accuracy'])
     return model
 
-
-
+def save_model(path, model):
+    '''
+    saves the model with weights + architecture description
+    :param path: path where to save the model
+    :param model: instance of cleverhans model
+    '''
+    print("saving model to path ", path)
+    keras_model = model.model
+    keras_model.save(path)

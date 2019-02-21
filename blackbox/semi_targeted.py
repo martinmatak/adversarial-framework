@@ -2,6 +2,7 @@ import tensorflow as tf
 import keras
 import numpy as np
 from keras.optimizers import Adam
+from pathlib import Path
 
 from six.moves import xrange
 
@@ -16,7 +17,7 @@ from whitebox.attacks import fgsm, cw
 from utils.image_ops import L2_distance, save_image, resize_images
 from utils.numpy_ops import convert_to_one_hot
 from utils.generator import TestGenerator, TransferGenerator
-from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_simple_model, get_model
+from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_simple_model, get_model, save_model
 
 # prototype constants
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
@@ -103,6 +104,10 @@ def train_sub(data_aug, sess,
         print("Substitute training epoch #" + str(rho))
         train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE_SUB, encoding_needed=False)
         model_sub.model.fit_generator(generator=train_gen, epochs=1)
+
+        print("Saving substitute model that is trained so far")
+        path = Path(__file__).resolve().parent.parent.joinpath("model")
+        save_model(str(path) + "/sub_model_after_epoch" + str(rho) + ".h5", model_sub)
 
         input_sample = np.empty(shape=(1, IMAGE_SIZE_SUB, IMAGE_SIZE_SUB, NUM_OF_CHANNELS), dtype=np.float32)
         if rho < data_aug - 1:
