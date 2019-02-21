@@ -26,7 +26,7 @@ TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
 NUM_EPOCHS = 1
 ADV_ID_START = 5615
 ADV_ID_END = 7613
-NB_SUB_CLASSES = 4
+NB_SUB_CLASSES = 3
 
 # remote constants
 #MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
@@ -90,7 +90,6 @@ def train_sub(data_aug, sess,
 
     print("Loading substitute model...")
     model = get_simple_model(NB_SUB_CLASSES)
-    model.compile(optimizer=Adam(), loss="categorical_crossentropy")
     model_sub = KerasModelWrapper(model)
 
     preds_sub = model_sub.get_logits(placeholder_sub)
@@ -161,7 +160,6 @@ def train_sub_no_augmn(data, target_model, sess):
     labels = bbox_predict(target_model, data, sess, x, batch_size=1)
     print("Samples labeled")
 
-
     print("Training a substitute model...")
     train_gen = TransferGenerator(data, labels , BATCH_SIZE, IMAGE_SIZE_SUB, encoding_needed=False)
     model_sub.model.fit_generator(generator=train_gen, epochs=NUM_EPOCHS)
@@ -184,7 +182,7 @@ def generate_adv_samples(wrap, generator, sess):
     id_index = 0
 
     TEN_LABEL = convert_to_one_hot(0, NB_SUB_CLASSES)
-    NINETY_LABEL = convert_to_one_hot(3, NB_SUB_CLASSES)
+    NINETY_LABEL = convert_to_one_hot(NB_SUB_CLASSES-1, NB_SUB_CLASSES)
     for legit_sample, legit_label in generator:
 
         ground_truth = np.argmax(legit_label)
@@ -217,26 +215,27 @@ def blackbox(sess):
     #substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
     labels = [np.argmax(label, axis=None, out=None) for label in labels]
     labels = [int(label / int(101/NB_SUB_CLASSES)) for label in labels]
-    substitute = train_sub(data_aug=6, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
-
-    print("Evaluating the accuracy of the substitute model on clean examples...")
-    print("skipped")
-    #evaluate_generator(substitute.model, test_generator, EVAL_BATCH_SIZE)
+    substitute = train_sub(data_aug=1, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the black-box model on clean examples...")
     bbox_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE_BBOX)
     evaluate_generator(target.model, bbox_generator, EVAL_BATCH_SIZE)
 
+    print("Evaluating the accuracy of the substitute model on clean examples...")
+    test_data, test_labels = get_dataset(bbox_generator)
+    sub_generator = TransferGenerator(test_data, test_labels, NB_SUB_CLASSES, BATCH_SIZE, IMAGE_SIZE_SUB, encoding_needed=True)
+    evaluate_generator(substitute.model, sub_generator, EVAL_BATCH_SIZE)
+
     print("Generating adversarial samples...")
-    sub_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE_SUB)
     generate_adv_samples(substitute, sub_generator, sess)
 
     print("Loading adversarial samples...")
     result_bbox_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE_BBOX)
 
     print("Evaluating the accuracy of the substitute model on adversarial examples...")
-    print("skipped")
-    #evaluate_generator(substitute.model, result_generator, EVAL_BATCH_SIZE)
+    result_data, result_labels = get_dataset(result_bbox_generator)
+    sub_adv_generator = TransferGenerator(result_data, result_labels, NB_SUB_CLASSES, BATCH_SIZE, IMAGE_SIZE_SUB, encoding_needed=True)
+    evaluate_generator(substitute.model, sub_adv_generator, EVAL_BATCH_SIZE)
 
     print("Evaluating the accuracy of the black-box model on adversarial examples...")
     evaluate_generator(target.model, result_bbox_generator, EVAL_BATCH_SIZE)

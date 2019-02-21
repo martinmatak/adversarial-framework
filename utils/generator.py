@@ -70,7 +70,8 @@ class TransferGenerator(Sequence):
         x = np.zeros((batch_size, image_size, image_size, 3), dtype=np.uint8)
         y = np.zeros((batch_size, 1), dtype=np.int32)
         for i in range(batch_size):
-            x[i] = self.data[idx*batch_size + i]
+            image = self.data[idx*batch_size + i]
+            x[i] = cv2.resize(image, (image_size, image_size))
             label = self.labels[idx*batch_size + i]
             y[i] = int(min(label, 99) / int(101/self.num_classes))
 
