@@ -23,18 +23,18 @@ from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argm
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
 TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
-NUM_EPOCHS = 1
+NUM_EPOCHS_SUB = 2
 ADV_ID_START = 5615
 ADV_ID_END = 7613
 NB_SUB_CLASSES = 3
+AUG_BATCH_SIZE = 512
+PREDICT_BATCH_SIZE = 64
 
 # remote constants
 #MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
 #TRAINING_SET_PATH = '/root/datasets/appa-real-release-1000'
 #TEST_SET_PATH = '/root/datasets/appa-real-release-100'
-#NUM_EPOCHS = 40
 #ADV_ID_START = 5613
-#ADV_ID_END = 7613
 
 ATTACK_NAME = 'fgsm'
 RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/' + ATTACK_NAME + '/'
@@ -65,7 +65,7 @@ def post_process_predictions(predictions):
     return post_process_predictions
 
 
-def bbox_predict(model, data, sess, x, batch_size=64):
+def bbox_predict(model, data, sess, x, batch_size=PREDICT_BATCH_SIZE):
     # here comes API call or anything similar
     print("querying bbox...")
     data = resize_images(data, IMAGE_SIZE_BBOX)
@@ -84,7 +84,7 @@ def bbox_predict(model, data, sess, x, batch_size=64):
 
 
 def train_sub(data_aug, sess,
-              x_sub, y_sub, lmbda, target_model, aug_batch_size=512):
+              x_sub, y_sub, lmbda, target_model, aug_batch_size=AUG_BATCH_SIZE):
     placeholder_sub = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE_SUB, IMAGE_SIZE_SUB, NUM_OF_CHANNELS))
     placeholder_bbox = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE_BBOX, IMAGE_SIZE_BBOX, NUM_OF_CHANNELS))
 
@@ -104,7 +104,7 @@ def train_sub(data_aug, sess,
     for rho in xrange(data_aug):
         print("Substitute training epoch #" + str(rho))
         train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE_SUB, encoding_needed=False)
-        model_sub.model.fit_generator(generator=train_gen, epochs=10)
+        model_sub.model.fit_generator(generator=train_gen, epochs=NUM_EPOCHS_SUB)
 
         print("Saving substitute model that is trained so far")
         path = Path(__file__).resolve().parent.parent.joinpath("model")
