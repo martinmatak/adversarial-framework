@@ -67,7 +67,7 @@ def post_process_predictions(predictions):
 
 def bbox_predict(model, data, sess, x, batch_size=1):
     # here comes API call or anything similar
-    print("Num of queries to bbox: " + str(len(data)))
+    print("querying bbox...")
     data = resize_images(data, IMAGE_SIZE_BBOX)
     predictions = model_argmax(sess, x, model.get_logits(x), data[:batch_size])
     data = data[batch_size:]
@@ -78,6 +78,8 @@ def bbox_predict(model, data, sess, x, batch_size=1):
     print(predictions)
     post_processed_predictions = post_process_predictions(predictions)
     print(post_processed_predictions)
+    print("bbox querying finished")
+    print("Num of queries to bbox requsted in this call: " + str(len(post_processed_predictions)))
     return post_processed_predictions
 
 
@@ -109,35 +111,38 @@ def train_sub(data_aug, sess,
         path = Path(__file__).resolve().parent.parent.joinpath("model")
         save_model(str(path) + "/sub_model_after_epoch" + str(rho) + ".h5", model_sub)
 
-        input_sample = np.empty(shape=(1, IMAGE_SIZE_SUB, IMAGE_SIZE_SUB, NUM_OF_CHANNELS), dtype=np.float32)
+        # input_sample = np.empty(shape=(1, IMAGE_SIZE_SUB, IMAGE_SIZE_SUB, NUM_OF_CHANNELS), dtype=np.float32)
         if rho < data_aug - 1:
             print("Augmenting substitute training data...")
             # Perform the Jacobian augmentation
             lmbda_coef = 2 * int(int(rho / 3) != 0) - 1
 
-            x_sub_tmp = np.vstack([x_sub, x_sub])
-            for i in range(0, len(y_sub)):
-                input_sample[0, :, :, :] = x_sub[i]
-                adv = jacobian_augmentation(
-                    sess=sess,
-                    x=placeholder_sub,
-                    X_sub_prev=input_sample,
-                    Y_sub=[y_sub[i]],
-                    grads=grads,
-                    lmbda=lmbda_coef*lmbda,
-                    aug_batch_size=aug_batch_size
-                )
-                x_sub_tmp[2*i] = adv[0, :, :, :]
-                x_sub_tmp[2*i + 1] = adv[1, :, :, :]
+            # per image augmentation
+            # x_sub_tmp = np.vstack([x_sub, x_sub])
+            # for i in range(0, len(y_sub)):
+            #     input_sample[0, :, :, :] = x_sub[i]
+            #     adv = jacobian_augmentation(
+            #         sess=sess,
+            #         x=placeholder_sub,
+            #         X_sub_prev=input_sample,
+            #         Y_sub=[y_sub[i]],
+            #         grads=grads,
+            #         lmbda=lmbda_coef*lmbda,
+            #         aug_batch_size=aug_batch_size
+            #     )
+            #     x_sub_tmp[2*i] = adv[0, :, :, :]
+            #     x_sub_tmp[2*i + 1] = adv[1, :, :, :]
+            #
+            # x_sub = x_sub_tmp
 
-            x_sub = x_sub_tmp
+            x_sub = jacobian_augmentation(sess, placeholder_sub, x_sub, y_sub, grads,
+                                          lmbda_coef * lmbda, aug_batch_size)
             print("Substitute training data augmented.")
 
             print("Labeling substitute training data using bbox...")
             y_sub = np.hstack([y_sub, y_sub])
             x_sub_prev = x_sub[int(len(x_sub) / 2):]
-            predictions = bbox_predict(target_model, x_sub_prev, sess, placeholder_bbox)
-            y_sub[int(len(x_sub)/2):] = predictions
+            y_sub[int(len(x_sub)/2):] = bbox_predict(target_model, x_sub_prev, sess, placeholder_bbox)
     return model_sub
 
 
