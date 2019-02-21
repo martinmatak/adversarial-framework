@@ -109,7 +109,7 @@ def get_simple_model(num_classes):
     # Let's train the model using RMSprop
     model.compile(loss='categorical_crossentropy',
                   optimizer=opt,
-                  metrics=[categorical_accuracy])
+                  metrics=['accuracy'])
     return model
 
 def save_model(path, model):

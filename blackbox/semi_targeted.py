@@ -65,7 +65,7 @@ def post_process_predictions(predictions):
     return post_process_predictions
 
 
-def bbox_predict(model, data, sess, x, batch_size=1):
+def bbox_predict(model, data, sess, x, batch_size=64):
     # here comes API call or anything similar
     print("querying bbox...")
     data = resize_images(data, IMAGE_SIZE_BBOX)
@@ -84,7 +84,7 @@ def bbox_predict(model, data, sess, x, batch_size=1):
 
 
 def train_sub(data_aug, sess,
-              x_sub, y_sub, lmbda, target_model, aug_batch_size=1):
+              x_sub, y_sub, lmbda, target_model, aug_batch_size=512):
     placeholder_sub = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE_SUB, IMAGE_SIZE_SUB, NUM_OF_CHANNELS))
     placeholder_bbox = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE_BBOX, IMAGE_SIZE_BBOX, NUM_OF_CHANNELS))
 
@@ -104,7 +104,7 @@ def train_sub(data_aug, sess,
     for rho in xrange(data_aug):
         print("Substitute training epoch #" + str(rho))
         train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE_SUB, encoding_needed=False)
-        model_sub.model.fit_generator(generator=train_gen, epochs=1)
+        model_sub.model.fit_generator(generator=train_gen, epochs=10)
 
         print("Saving substitute model that is trained so far")
         path = Path(__file__).resolve().parent.parent.joinpath("model")
@@ -201,10 +201,6 @@ def generate_adv_samples(wrap, generator, sess):
 
 
 def blackbox(sess):
-
-    # Seed random number generator so results are reproducible
-    rng = np.random.RandomState([2019, 1, 30])
-
     # simulate the black-box model locally
     print("Preparing the black-box model.")
     target = prep_bbox()
@@ -212,10 +208,9 @@ def blackbox(sess):
     # train substitute using method from https://arxiv.org/abs/1602.02697
     print("Training the substitute model by querying the target network..")
     data, labels = get_dataset(TestGenerator(TRAINING_SET_PATH, BATCH_SIZE, IMAGE_SIZE_SUB))
-    #substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
     labels = [np.argmax(label, axis=None, out=None) for label in labels]
     labels = [int(label / int(101/NB_SUB_CLASSES)) for label in labels]
-    substitute = train_sub(data_aug=1, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
+    substitute = train_sub(data_aug=6, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the black-box model on clean examples...")
     bbox_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE_BBOX)
