@@ -202,6 +202,10 @@ def generate_adv_samples(wrap, generator, sess):
     print("Average L2 perturbation summed by channels: ", str(sum(diff_L2) / float(len(diff_L2))))
 
 
+def assert_equal(L1, L2):
+    return len(L1) == len(L2) and sorted(L1) == sorted(L2)
+
+
 def blackbox(sess):
     # simulate the black-box model locally
     print("Preparing the black-box model.")
@@ -211,7 +215,6 @@ def blackbox(sess):
     print("Training the substitute model by querying the target network..")
     data, labels = get_dataset(CustomGenerator(CSV_PATH, NB_SUB_CLASSES, BATCH_SIZE, IMAGE_SIZE_SUB))
     labels = [np.argmax(label, axis=None, out=None) for label in labels]
-    labels = [int(label / int(101/NB_SUB_CLASSES)) for label in labels]
     substitute = train_sub(data_aug=6, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the black-box model on clean examples...")
@@ -237,6 +240,7 @@ def blackbox(sess):
     result_labels = [np.argmax(label, axis=None, out=None) for label in result_labels]
     result_labels = [int(label / int(101/NB_SUB_CLASSES)) for label in result_labels]
 
+    assert_equal(result_labels, test_labels)
     sub_adv_generator = TransferGenerator(result_data, result_labels, NB_SUB_CLASSES, BATCH_SIZE, IMAGE_SIZE_SUB)
     evaluate_generator(substitute.model, sub_adv_generator, EVAL_BATCH_SIZE)
 
