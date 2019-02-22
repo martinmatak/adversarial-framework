@@ -38,7 +38,7 @@ class TestGenerator(Sequence):
         df = pd.read_csv(str(gt_val_path))
 
         for i, row in df.iterrows():
-            age = min(100, int(row.apparent_age_avg))
+            age = min(99, int(row.apparent_age_avg))
             # age = int(row.real_age)
             image_path = val_image_dir.joinpath(row.file_name + "_face.jpg")
 
@@ -119,10 +119,10 @@ class CustomGenerator(Sequence):
         images_dir = root_path.joinpath("test")
         df = pd.read_csv(str(csv_path))
         for i, row in df.iterrows():
-            age = min(100, int(row.apparent_age_avg))
+            age = min(99, int(row.apparent_age_avg))
             image_path = images_dir.joinpath(row.file_name + "_face.jpg")
             if image_path.is_file():
                 self.image_path_and_age.append([str(image_path), age])
 
     def _convert_age(self, age):
-        return int(min(age, 100) / int(101 / self.num_classes))
+        return int(min(age, 99) / int(101 / self.num_classes))

@@ -4,7 +4,6 @@ from keras.utils import to_categorical
 from keras.applications import ResNet50, VGG16
 from keras.layers import Dense, Flatten, Activation, Conv2D, MaxPooling2D, Dropout
 from keras.models import Model, Sequential
-from keras.optimizers import rmsprop
 
 def model_argmax(sess, x, predictions, samples, feed=None):
     """
@@ -80,8 +79,8 @@ def get_model(model_name="ResNet50"):
 
 
 def get_simple_model(num_classes):
-    model = Sequential()
     nb_filters = 64
+    model = Sequential()
     model.add(Conv2D(nb_filters, (8, 8), padding='same', input_shape=(224, 224, 3)))
     model.add(Activation('relu'))
     model.add(Conv2D(nb_filters * 2, (6, 6), padding='valid'))
