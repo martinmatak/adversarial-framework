@@ -82,15 +82,17 @@ def get_model(model_name="ResNet50"):
 def get_simple_model(num_classes):
     model = Sequential()
     nb_filters = 64
-    model.add(Conv2D(nb_filters, (8, 8), (2, 2), padding='same', input_shape=(32, 32, 3)))
+    model.add(Conv2D(nb_filters, (8, 8), padding='same', input_shape=(32, 32, 3)))
     model.add(Activation('relu'))
-    model.add(Conv2D(nb_filters * 2, (6, 6), (2, 2), padding='valid', input_shape=(32, 32, 3)))
+    model.add(Conv2D(nb_filters * 2, (6, 6), padding='valid'))
     model.add(Activation('relu'))
-    model.add(Conv2D(nb_filters * 2, (5, 5), (1, 1), padding='valid', input_shape=(32, 32, 3)))
+    model.add(Conv2D(nb_filters * 2, (5, 5),  padding='valid'))
     model.add(Activation('relu'))
+    model.add(Flatten())
     model.add(Dense(num_classes))
     model.add(Activation('softmax'))
     return model
+
 
 def save_model(path, model):
     '''
