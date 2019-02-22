@@ -9,8 +9,9 @@ def save_results(adv_x, attack_type, attack_name, successful, original_class, ta
     path = directory + '/' + image_name
     save_image(path, adv_x)
 
-def save_image(path, image):
-    cv2.imwrite(path, image)
+def save_image(path, image, image_size=224):
+    print("saving " + str(path))
+    cv2.imwrite(path, cv2.resize(image, (image_size, image_size)))
 
 
 def load_image(image_path, image_size):
