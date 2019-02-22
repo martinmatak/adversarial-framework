@@ -43,7 +43,7 @@ CSV_PATH = TRAINING_SET_PATH + '/' + 'custom-dataset.csv'
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1
 IMAGE_SIZE_BBOX = 224
-IMAGE_SIZE_SUB = 32
+IMAGE_SIZE_SUB = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
 
@@ -157,7 +157,7 @@ def generate_adv_samples(wrap, generator, sess):
 
         diff_L2.append(L2_distance(legit_sample, adv_x))
 
-        save_image(RESULT_PATH + '/test/' + img_ids[id_index] + ".jpg_face.jpg", adv_x[0, :, :, :])
+        save_image(RESULT_PATH + 'test/' + img_ids[id_index] + ".jpg_face.jpg", adv_x[0, :, :, :])
         id_index += 1
 
     print("Average L2 perturbation summed by channels: ", str(sum(diff_L2) / float(len(diff_L2))))
