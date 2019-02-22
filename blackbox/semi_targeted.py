@@ -23,10 +23,10 @@ from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argm
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
 TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
-NUM_EPOCHS_SUB = 2
+NUM_EPOCHS_SUB = 1
 ADV_ID_START = 5615
 ADV_ID_END = 7613
-NB_SUB_CLASSES = 3
+NB_SUB_CLASSES = 5
 AUG_BATCH_SIZE = 512
 PREDICT_BATCH_SIZE = 64
 

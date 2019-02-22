@@ -2,7 +2,7 @@ import pandas as pd
 
 csv_path = '/Users/mmatak/dev/thesis/datasets/appa-real-release/gt_avg_test.csv'
 csv_path = '/root/datasets/appa-real-release/gt_avg_test.csv'
-num_of_categories = 3
+num_of_categories = 5
 
 age_span_per_category = int(101/int(num_of_categories))
 print("age span per category: ", age_span_per_category)

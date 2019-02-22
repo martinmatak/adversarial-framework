@@ -20,13 +20,13 @@ random.seed(111)
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/sub_model_after_epoch3.h5'
+MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/sub_model_after_epoch5.h5'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 MODEL_PATH = '/root/adversarial_framework/model/sub_model_after_epoch5.h5'
 TEST_SET_PATH = '/root/datasets/appa-real-release-100'
 IMAGE_SIZE = 32
 NUM_OF_CHANNELS = 3
-NB_CLASSES = 3
+NB_CLASSES = 5
 
 
 # start tf session
@@ -59,7 +59,7 @@ evaluate_generator(model, clean_generator, EVAL_BATCH_SIZE)
 
 # pick the attack
 attack = 'fgsm'
-#attack = 'cw'
+attack = 'cw'
 
 # not working because of memory consumption
 #attack = 'jsma'
