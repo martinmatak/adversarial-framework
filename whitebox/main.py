@@ -1,6 +1,6 @@
 from utils.generator import TestGenerator, TransferGenerator
 from utils.image_ops import L2_distance, save_image
-from utils.model_ops import evaluate_generator, get_dataset
+from utils.model_ops import evaluate_generator, get_dataset, model_argmax
 from utils.numpy_ops import convert_to_one_hot
 from whitebox.attacks import fgsm, cw, jsma
 
@@ -14,16 +14,14 @@ import tensorflow as tf
 import numpy as np
 import random
 
-attack = 'fgsm'
-
 random.seed(111)
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/sub_model_after_epoch5.h5'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
-MODEL_PATH = '/root/adversarial_framework/model/sub_model_after_epoch5.h5'
-TEST_SET_PATH = '/root/datasets/appa-real-release-100'
+#MODEL_PATH = '/root/adversarial_framework/model/sub_model_after_epoch5.h5'
+#TEST_SET_PATH = '/root/datasets/appa-real-release-100'
 IMAGE_SIZE = 32
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 5
@@ -50,6 +48,17 @@ test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
 x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE, NUM_OF_CHANNELS))
 y = tf.placeholder(tf.float32, shape=(None, NB_CLASSES))
 
+def bbox_predict(wrap, data, sess, x, batch_size=1):
+    # here comes API call or anything similar
+    print("Num of queries for prediction: " + str(len(data)))
+    predictions = model_argmax(sess, x, wrap.get_logits(x), data[:batch_size])
+    data = data[batch_size:]
+    while len(data) > 0:
+        predictions_new = model_argmax(sess, x, wrap.get_logits(x), data[:batch_size])
+        predictions = np.hstack([predictions, predictions_new])
+        data = data[batch_size:]
+    print(predictions)
+    return predictions
 
 print("Loading clean samples...")
 print("Evaluating the accuracy of the model on clean examples...")
@@ -67,6 +76,7 @@ attack = 'cw'
 RESULT_PATH = TEST_SET_PATH + '-adv/whitebox/' + attack + '/'
 
 wrap = KerasModelWrapper(model)
+bbox_predict(wrap, data, sess, x)
 if attack == 'fgsm':
     attack_instance_graph = FastGradientMethod(wrap, sess)
     attack_instance = fgsm
