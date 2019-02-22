@@ -106,35 +106,19 @@ def train_sub(data_aug, sess,
     for rho in xrange(data_aug):
         print("Substitute training epoch #" + str(rho))
         train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE_SUB, encoding_needed=False)
+        print("Fitting the generator with the labels: ")
+        print(train_gen.labels)
         model_sub.model.fit_generator(generator=train_gen, epochs=NUM_EPOCHS_SUB)
 
         print("Saving substitute model that is trained so far")
         path = Path(__file__).resolve().parent.parent.joinpath("model")
-        save_model(str(path) + "/sub_model_after_epoch" + str(rho) + ".h5", model_sub)
+        save_model(str(path) + "/sub_model_after_epoch" + str(rho) + ".h5", model_sub.model)
 
         # input_sample = np.empty(shape=(1, IMAGE_SIZE_SUB, IMAGE_SIZE_SUB, NUM_OF_CHANNELS), dtype=np.float32)
         if rho < data_aug - 1:
             print("Augmenting substitute training data...")
             # Perform the Jacobian augmentation
             lmbda_coef = 2 * int(int(rho / 3) != 0) - 1
-
-            # per image augmentation
-            # x_sub_tmp = np.vstack([x_sub, x_sub])
-            # for i in range(0, len(y_sub)):
-            #     input_sample[0, :, :, :] = x_sub[i]
-            #     adv = jacobian_augmentation(
-            #         sess=sess,
-            #         x=placeholder_sub,
-            #         X_sub_prev=input_sample,
-            #         Y_sub=[y_sub[i]],
-            #         grads=grads,
-            #         lmbda=lmbda_coef*lmbda,
-            #         aug_batch_size=aug_batch_size
-            #     )
-            #     x_sub_tmp[2*i] = adv[0, :, :, :]
-            #     x_sub_tmp[2*i + 1] = adv[1, :, :, :]
-            #
-            # x_sub = x_sub_tmp
 
             x_sub = jacobian_augmentation(sess, placeholder_sub, x_sub, y_sub, grads,
                                           lmbda_coef * lmbda, aug_batch_size)
@@ -144,29 +128,6 @@ def train_sub(data_aug, sess,
             y_sub = np.hstack([y_sub, y_sub])
             x_sub_prev = x_sub[int(len(x_sub) / 2):]
             y_sub[int(len(x_sub)/2):] = bbox_predict(target_model, x_sub_prev, sess, placeholder_bbox)
-    return model_sub
-
-
-def train_sub_no_augmn(data, target_model, sess):
-    print("Loading a substitute model...")
-
-    x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE_SUB, IMAGE_SIZE_SUB, NUM_OF_CHANNELS))
-
-    model = get_model()
-    model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
-    model_sub = KerasModelWrapper(model)
-
-    print("Substitute model loaded")
-
-    print("Labeling samples...")
-    labels = bbox_predict(target_model, data, sess, x, batch_size=1)
-    print("Samples labeled")
-
-    print("Training a substitute model...")
-    train_gen = TransferGenerator(data, labels , BATCH_SIZE, IMAGE_SIZE_SUB, encoding_needed=False)
-    model_sub.model.fit_generator(generator=train_gen, epochs=NUM_EPOCHS)
-    print("Subsitute model trained")
-
     return model_sub
 
 
