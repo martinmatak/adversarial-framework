@@ -91,6 +91,7 @@ def train_sub(data_aug, sess,
 
     print("Loading substitute model...")
     model = get_simple_model(NB_SUB_CLASSES)
+    model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=['accuracy'])
     model_sub = KerasModelWrapper(model)
 
     preds_sub = model_sub.get_logits(placeholder_sub)
