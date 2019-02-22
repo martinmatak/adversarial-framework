@@ -22,7 +22,6 @@ from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argm
 # prototype constants
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
 TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
-CSV_PATH = TRAINING_SET_PATH + '/' + 'custom-dataset.csv'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
 NUM_EPOCHS_SUB = 2
 ADV_ID_START = 5615
@@ -32,13 +31,14 @@ AUG_BATCH_SIZE = 512
 PREDICT_BATCH_SIZE = 64
 
 # remote constants
-#MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
-#TRAINING_SET_PATH = '/root/datasets/appa-real-release-1000'
-#TEST_SET_PATH = '/root/datasets/appa-real-release-100'
-#ADV_ID_START = 5613
+MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
+TRAINING_SET_PATH = '/root/datasets/appa-real-release'
+TEST_SET_PATH = '/root/datasets/appa-real-release-100'
+ADV_ID_START = 5613
 
 ATTACK_NAME = 'fgsm'
 RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/' + ATTACK_NAME + '/'
+CSV_PATH = TRAINING_SET_PATH + '/' + 'custom-dataset.csv'
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1

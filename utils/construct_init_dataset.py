@@ -1,6 +1,7 @@
 import pandas as pd
 
 csv_path = '/Users/mmatak/dev/thesis/datasets/appa-real-release/gt_avg_test.csv'
+csv_path = '/root/datasets/appa-real-release/gt_avg_test.csv'
 num_of_categories = 3
 
 age_span_per_category = int(101/int(num_of_categories))
@@ -57,7 +58,7 @@ for category in num_of_samples_per_category.keys():
 
 print("Total number of samples: ", total_samples)
 
-if total_samples < total_dataset_size:
+if False:
     print("total size is less than expected dataset size, filling it up now with other samples...")
     for i, row in df.iterrows():
         age = min(max_age, int(row.apparent_age_avg))
