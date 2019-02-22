@@ -63,12 +63,14 @@ def bbox_predict(wrap, data, sess, x, batch_size=1):
 print("Loading clean samples...")
 print("Evaluating the accuracy of the model on clean examples...")
 data, labels = get_dataset(TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE))
-clean_generator = TransferGenerator(data, labels, NB_CLASSES, BATCH_SIZE, IMAGE_SIZE, encoding_needed=True)
+labels = [np.argmax(label, axis=None, out=None) for label in labels]
+labels = [int(label / int(101 / NB_CLASSES)) for label in labels]
+clean_generator = TransferGenerator(data, labels, NB_CLASSES, BATCH_SIZE, IMAGE_SIZE)
 evaluate_generator(model, clean_generator, EVAL_BATCH_SIZE)
 
 # pick the attack
 attack = 'fgsm'
-attack = 'cw'
+#attack = 'cw'
 
 # not working because of memory consumption
 #attack = 'jsma'
@@ -120,8 +122,10 @@ result_bbox_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE)
 
 print("Evaluating the accuracy of the substitute model on adversarial examples...")
 result_data, result_labels = get_dataset(result_bbox_generator)
-sub_adv_generator = TransferGenerator(result_data, result_labels, NB_CLASSES, BATCH_SIZE, IMAGE_SIZE,
-                                      encoding_needed=True)
+result_labels = [np.argmax(label, axis=None, out=None) for label in result_labels]
+result_labels = [int(label / int(101 / NB_CLASSES)) for label in result_labels]
+
+sub_adv_generator = TransferGenerator(result_data, result_labels, NB_CLASSES, BATCH_SIZE, IMAGE_SIZE)
 evaluate_generator(wrap.model, sub_adv_generator, EVAL_BATCH_SIZE)
 
 
