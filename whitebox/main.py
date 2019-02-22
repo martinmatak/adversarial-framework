@@ -22,6 +22,8 @@ BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/sub_model_after_epoch3.h5'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
+#MODEL_PATH = '/root/adversarial_framework/model/sub_model_after_epoch5.h5'
+#TEST_SET_PATH = '/root/datasets/appa-real-release-100'
 IMAGE_SIZE = 32
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 3
@@ -56,13 +58,13 @@ clean_generator = TransferGenerator(data, labels, NB_CLASSES, BATCH_SIZE, IMAGE_
 evaluate_generator(model, clean_generator, EVAL_BATCH_SIZE)
 
 # pick the attack
-#attack = 'fgsm'
+attack = 'fgsm'
 #attack = 'cw'
 
 # not working because of memory consumption
 #attack = 'jsma'
 
-RESULT_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-adv/whitebox/' + attack
+RESULT_PATH = TEST_SET_PATH + '-adv/whitebox/' + attack + '/'
 
 wrap = KerasModelWrapper(model)
 if attack == 'fgsm':
