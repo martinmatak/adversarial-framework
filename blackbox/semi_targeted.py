@@ -60,7 +60,7 @@ def post_process_predictions(predictions):
     post_process_predictions = np.ones_like(predictions)
     for index, label in enumerate(predictions):
         #print("label: ", label)
-        new_label = int(min(label, 99) / int(101/NB_SUB_CLASSES))
+        new_label = int(min(label, 100) / int(101/NB_SUB_CLASSES))
         #print("new label: ", new_label)
         post_process_predictions[index] = new_label
     return post_process_predictions

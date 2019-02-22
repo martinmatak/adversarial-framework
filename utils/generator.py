@@ -72,7 +72,7 @@ class TransferGenerator(Sequence):
             image = self.data[idx*batch_size + i]
             x[i] = cv2.resize(image, (image_size, image_size))
             label = self.labels[idx*batch_size + i]
-            y[i] = int(min(label, 100) / int(101/self.num_classes))
+            y[i] = label
 
         return x, to_categorical(y, num_classes=self.num_classes)
 
