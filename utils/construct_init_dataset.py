@@ -1,9 +1,7 @@
-import sys
 import pandas as pd
-from pathlib import Path
 
 csv_path = '/Users/mmatak/dev/thesis/datasets/appa-real-release/gt_avg_test.csv'
-num_of_categories = 4
+num_of_categories = 3
 
 age_span_per_category = int(101/int(num_of_categories))
 print("age span per category: ", age_span_per_category)

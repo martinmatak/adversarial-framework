@@ -5,7 +5,6 @@ from keras.applications import ResNet50, VGG16
 from keras.layers import Dense, Flatten, Activation, Conv2D, MaxPooling2D, Dropout
 from keras.models import Model, Sequential
 from keras.optimizers import rmsprop
-from keras.metrics import categorical_accuracy
 
 def model_argmax(sess, x, predictions, samples, feed=None):
     """
