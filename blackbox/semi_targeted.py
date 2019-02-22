@@ -31,10 +31,10 @@ AUG_BATCH_SIZE = 512
 PREDICT_BATCH_SIZE = 64
 
 # remote constants
-MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
-TRAINING_SET_PATH = '/root/datasets/appa-real-release'
-TEST_SET_PATH = '/root/datasets/appa-real-release-100'
-ADV_ID_START = 5613
+#MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
+#TRAINING_SET_PATH = '/root/datasets/appa-real-release'
+#TEST_SET_PATH = '/root/datasets/appa-real-release-100'
+#ADV_ID_START = 5613
 
 ATTACK_NAME = 'fgsm'
 RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/' + ATTACK_NAME + '/'
@@ -190,9 +190,9 @@ def generate_adv_samples(wrap, generator, sess):
         ground_truth = np.argmax(legit_label)
 
         if ground_truth > 50:
-            adv_x = attack_instance.attack(legit_sample, TEN_LABEL, attack_instance_graph)
+            adv_x = attack_instance.attack(legit_sample, None, attack_instance_graph)
         else:
-            adv_x = attack_instance.attack(legit_sample, NINETY_LABEL, attack_instance_graph)
+            adv_x = attack_instance.attack(legit_sample, None, attack_instance_graph)
 
         diff_L2.append(L2_distance(legit_sample, adv_x))
 
@@ -220,7 +220,9 @@ def blackbox(sess):
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
     test_data, test_labels = get_dataset(bbox_generator)
-    sub_generator = TransferGenerator(test_data, test_labels, NB_SUB_CLASSES, BATCH_SIZE, IMAGE_SIZE_SUB, encoding_needed=True)
+    test_labels = [np.argmax(label, axis=None, out=None) for label in test_labels]
+    test_labels = [int(label / int(101/NB_SUB_CLASSES)) for label in test_labels]
+    sub_generator = TransferGenerator(test_data, test_labels, NB_SUB_CLASSES, BATCH_SIZE, IMAGE_SIZE_SUB)
     evaluate_generator(substitute.model, sub_generator, EVAL_BATCH_SIZE)
 
     print("Generating adversarial samples...")
@@ -231,7 +233,11 @@ def blackbox(sess):
 
     print("Evaluating the accuracy of the substitute model on adversarial examples...")
     result_data, result_labels = get_dataset(result_bbox_generator)
-    sub_adv_generator = TransferGenerator(result_data, result_labels, NB_SUB_CLASSES, BATCH_SIZE, IMAGE_SIZE_SUB, encoding_needed=True)
+
+    result_labels = [np.argmax(label, axis=None, out=None) for label in result_labels]
+    result_labels = [int(label / int(101/NB_SUB_CLASSES)) for label in result_labels]
+
+    sub_adv_generator = TransferGenerator(result_data, result_labels, NB_SUB_CLASSES, BATCH_SIZE, IMAGE_SIZE_SUB)
     evaluate_generator(substitute.model, sub_adv_generator, EVAL_BATCH_SIZE)
 
     print("Evaluating the accuracy of the black-box model on adversarial examples...")
