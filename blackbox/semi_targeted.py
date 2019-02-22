@@ -16,12 +16,13 @@ from cleverhans.utils_keras import KerasModelWrapper
 from whitebox.attacks import fgsm, cw
 from utils.image_ops import L2_distance, save_image, resize_images
 from utils.numpy_ops import convert_to_one_hot
-from utils.generator import TestGenerator, TransferGenerator
+from utils.generator import TestGenerator, TransferGenerator, CustomGenerator
 from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_simple_model, get_model, save_model
 
 # prototype constants
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
 TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
+CSV_PATH = TRAINING_SET_PATH + '/' + 'custom-dataset.csv'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
 NUM_EPOCHS_SUB = 2
 ADV_ID_START = 5615
@@ -207,7 +208,7 @@ def blackbox(sess):
 
     # train substitute using method from https://arxiv.org/abs/1602.02697
     print("Training the substitute model by querying the target network..")
-    data, labels = get_dataset(TestGenerator(TRAINING_SET_PATH, BATCH_SIZE, IMAGE_SIZE_SUB))
+    data, labels = get_dataset(CustomGenerator(CSV_PATH, NB_SUB_CLASSES, BATCH_SIZE, IMAGE_SIZE_SUB))
     labels = [np.argmax(label, axis=None, out=None) for label in labels]
     labels = [int(label / int(101/NB_SUB_CLASSES)) for label in labels]
     substitute = train_sub(data_aug=6, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)

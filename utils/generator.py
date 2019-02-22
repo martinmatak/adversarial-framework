@@ -2,7 +2,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import cv2
-import random
 from keras.utils import Sequence, to_categorical
 
 
@@ -73,7 +72,7 @@ class TransferGenerator(Sequence):
             image = self.data[idx*batch_size + i]
             x[i] = cv2.resize(image, (image_size, image_size))
             label = self.labels[idx*batch_size + i]
-            y[i] = int(min(label, 99) / int(101/self.num_classes))
+            y[i] = int(min(label, 100) / int(101/self.num_classes))
 
         return x, to_categorical(y, num_classes=self.num_classes)
 
@@ -89,3 +88,41 @@ class TransferGenerator(Sequence):
         self.image_size = image_size
 
 
+class CustomGenerator(Sequence):
+    def __init__(self, csv_path, num_classes, batch_size=32, image_size=224):
+        self.image_path_and_age = []
+        self._load_csv(csv_path)
+        self.image_num = len(self.image_path_and_age)
+        self.batch_size = batch_size
+        self.image_size = image_size
+        self.num_classes = num_classes
+
+    def __len__(self):
+        return self.image_num // self.batch_size
+
+    def __getitem__(self, idx):
+        batch_size = self.batch_size
+        image_size = self.image_size
+        x = np.zeros((batch_size, image_size, image_size, 3), dtype=np.uint8)
+        y = np.zeros((batch_size, 1), dtype=np.int32)
+
+        for i in range(batch_size):
+            image_path, age = self.image_path_and_age[idx * batch_size + i]
+            image = cv2.imread(str(image_path))
+            x[i] = cv2.resize(image, (image_size, image_size))
+            y[i] = self._convert_age(age)
+
+        return x, to_categorical(y, self.num_classes)
+
+    def _load_csv(self, csv_path):
+        root_path = Path(csv_path).parent
+        images_dir = root_path.joinpath("test")
+        df = pd.read_csv(str(csv_path))
+        for i, row in df.iterrows():
+            age = min(100, int(row.apparent_age_avg))
+            image_path = images_dir.joinpath(row.file_name + "_face.jpg")
+            if image_path.is_file():
+                self.image_path_and_age.append([str(image_path), age])
+
+    def _convert_age(self, age):
+        return int(min(age, 100) / int(101 / self.num_classes))
