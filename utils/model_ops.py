@@ -43,6 +43,7 @@ def evaluate_generator(model, generator, batch_size):
 
 
 def evaluate(model, x_test, y_test, batch_size):
+    print(y_test)
     result = model.evaluate(x_test, y_test, batch_size, verbose=1)
 
     print(model.metrics_names[1] + ": " + str(result[1]))

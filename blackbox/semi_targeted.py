@@ -102,10 +102,10 @@ def train_sub(data_aug, sess,
     grads = jacobian_graph(preds_sub, placeholder_sub, NB_SUB_CLASSES)
     print("Jacobian graph defined.")
 
-    train_gen = TransferGenerator(x_sub, y_sub, num_classes=NB_SUB_CLASSES, batch_size=BATCH_SIZE, image_size=IMAGE_SIZE_SUB, encoding_needed=False)
+    train_gen = TransferGenerator(x_sub, y_sub, num_classes=NB_SUB_CLASSES, batch_size=BATCH_SIZE, image_size=IMAGE_SIZE_SUB)
     for rho in xrange(data_aug):
         print("Substitute training epoch #" + str(rho))
-        train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE_SUB, encoding_needed=False)
+        train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE_SUB)
         print("Fitting the generator with the labels: ")
         print(train_gen.labels)
         model_sub.model.fit_generator(generator=train_gen, epochs=NUM_EPOCHS_SUB)
