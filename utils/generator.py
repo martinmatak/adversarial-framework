@@ -73,13 +73,10 @@ class TransferGenerator(Sequence):
 
         return x, to_categorical(y, num_classes=self.num_classes)
 
-    def reinitialize(self, data, labels, batch_size=32, image_size=224, encoding_needed=True):
+    def reinitialize(self, data, labels, batch_size=32, image_size=224):
         # encoding needed is TRUE if given labels are one hot encoded
         self.data = data
-        if encoding_needed:
-            self.labels = [np.argmax(label, axis=None, out=None) for label in labels]
-        else:
-            self.labels = labels
+        self.labels = labels
         self.image_num = len(labels)
         self.batch_size = batch_size
         self.image_size = image_size
