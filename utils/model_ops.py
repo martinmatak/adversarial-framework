@@ -63,7 +63,7 @@ def train_model(model, data, labels, nb_classes):
     return model
 
 
-def get_model(model_name="ResNet50"):
+def get_model(model_name="ResNet50", num_classes = 101):
     base_model = None
 
     if model_name == "ResNet50":
@@ -71,7 +71,7 @@ def get_model(model_name="ResNet50"):
     elif model_name == "VGG16":
         base_model = VGG16(include_top=False, weights='imagenet', input_shape=(224, 224, 3), pooling="avg")
 
-    prediction = Dense(units=101, kernel_initializer="he_normal", use_bias=False, activation="softmax",
+    prediction = Dense(units=num_classes, kernel_initializer="he_normal", use_bias=False, activation="softmax",
                        name="pred_age")(base_model.output)
 
     model = Model(inputs=base_model.input, outputs=prediction)

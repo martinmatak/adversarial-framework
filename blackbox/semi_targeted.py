@@ -90,7 +90,8 @@ def train_sub(data_aug, sess,
     placeholder_bbox = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE_BBOX, IMAGE_SIZE_BBOX, NUM_OF_CHANNELS))
 
     print("Loading substitute model...")
-    model = get_simple_model(NB_SUB_CLASSES)
+    #model = get_simple_model(NB_SUB_CLASSES)
+    model = get_model("VGG16", NB_SUB_CLASSES)
     model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=['accuracy'])
     model_sub = KerasModelWrapper(model)
 
