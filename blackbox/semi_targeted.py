@@ -23,11 +23,11 @@ from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argm
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
 TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
-NUM_EPOCHS_SUB = 1
+NUM_EPOCHS_SUB = 3
 ADV_ID_START = 5615
 ADV_ID_END = 7613
 NB_SUB_CLASSES = 5
-AUG_BATCH_SIZE = 512
+AUG_BATCH_SIZE = 16
 PREDICT_BATCH_SIZE = 64
 
 # remote constants
@@ -40,8 +40,8 @@ ATTACK_NAME = 'fgsm'
 RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/' + ATTACK_NAME + '/'
 CSV_PATH = TRAINING_SET_PATH + '/' + 'custom-dataset.csv'
 
-BATCH_SIZE = 1
-EVAL_BATCH_SIZE = 1
+BATCH_SIZE = 16
+EVAL_BATCH_SIZE = 16
 IMAGE_SIZE_BBOX = 224
 IMAGE_SIZE_SUB = 224
 NUM_OF_CHANNELS = 3
@@ -126,8 +126,8 @@ def train_sub(data_aug, sess,
 
             print("Labeling substitute training data using bbox...")
             y_sub = np.hstack([y_sub, y_sub])
-            x_sub_prev = x_sub[int(len(x_sub) / 2):]
-            y_sub[int(len(x_sub)/2):] = bbox_predict(target_model, x_sub_prev, sess, placeholder_bbox)
+            x_sub_new = x_sub[int(len(x_sub) / 2):]
+            y_sub[int(len(x_sub)/2):] = bbox_predict(target_model, x_sub_new, sess, placeholder_bbox)
     return model_sub
 
 
