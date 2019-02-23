@@ -57,7 +57,7 @@ class TransferGenerator(Sequence):
         self.image_size = image_size
         self.num_classes = num_classes
         self.indices = np.arange(len(self.labels))
-        self.on_epoch_end()
+        np.random.shuffle(self.indices)
 
     def __len__(self):
         return self.image_num // self.batch_size
@@ -88,6 +88,9 @@ class TransferGenerator(Sequence):
         self.image_num = len(labels)
         self.batch_size = batch_size
         self.image_size = image_size
+        self.indices = np.arange(len(self.labels))
+        np.random.shuffle(self.indices)
+
 
 
 class CustomGenerator(Sequence):
