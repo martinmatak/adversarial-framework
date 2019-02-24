@@ -23,7 +23,7 @@ from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argm
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
 TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
-NUM_EPOCHS_SUB = 3
+NUM_EPOCHS_SUB = 40
 ADV_ID_START = 5615
 ADV_ID_END = 7613
 NB_SUB_CLASSES = 5
@@ -92,7 +92,7 @@ def train_sub(data_aug, sess,
     print("Loading substitute model...")
     #model = get_simple_model(NB_SUB_CLASSES)
     model = get_model("VGG16", NB_SUB_CLASSES)
-    model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=['accuracy'])
+    model.compile(optimizer=Adam(lr=0.0001, decay=1e-6), loss="categorical_crossentropy", metrics=['accuracy'])
     model_sub = KerasModelWrapper(model)
 
     preds_sub = model_sub.get_logits(placeholder_sub)
