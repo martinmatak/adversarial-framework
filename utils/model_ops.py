@@ -94,12 +94,11 @@ def get_simple_model(num_classes):
     return model
 
 
-def save_model(path, model):
+def save_model(path, keras_model):
     '''
     saves the model with weights + architecture description
     :param path: path where to save the model
-    :param model: instance of cleverhans model
+    :param model: instance of keras model
     '''
     print("saving model to path ", path)
-    keras_model = model.model
     keras_model.save(path)
