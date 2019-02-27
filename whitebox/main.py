@@ -18,13 +18,13 @@ random.seed(111)
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/sub_model_after_epoch5.h5'
+MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/vgg16-16.603-11.255-sgd.hdf5'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 #MODEL_PATH = '/root/adversarial_framework/model/sub_model_after_epoch5.h5'
 #TEST_SET_PATH = '/root/datasets/appa-real-release-100'
-IMAGE_SIZE = 32
+IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
-NB_CLASSES = 5
+NB_CLASSES = 101
 
 
 # start tf session

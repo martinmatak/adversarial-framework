@@ -6,13 +6,12 @@ from utils.image_ops import save_image, load_image
 from foolbox.models.base import Model
 from keras.models import load_model
 from keras.optimizers import Adam
-import matplotlib
 import matplotlib.pyplot as plt
 
 
 BATCH_SIZE = 1
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
-IMAGE_SOURCE_PATH = '/Users/mmatak/dev/thesis/datasets/chosen-images/10yrs-girl.jpg'
+IMAGE_SOURCE_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release/test/006578.jpg' #try 6250 or 6288 or 6307
 IMAGE_TARGET_PATH = '/Users/mmatak/dev/thesis/datasets/chosen-images/donald-trump.jpg'
 IMAGE_SIZE = 224
 NUM_ITERATIONS = 10000
@@ -86,18 +85,26 @@ fmodel = foolbox.models.KerasModel(prep_bbox(), bounds=(0, 255))
 fmodel = WebsiteModel(fmodel, fmodel._bounds, NB_CLASSES)
 
 image_source = load_image(IMAGE_SOURCE_PATH, IMAGE_SIZE)
-image_target= load_image(IMAGE_TARGET_PATH, IMAGE_SIZE)
+image_target = load_image(IMAGE_TARGET_PATH, IMAGE_SIZE)
 
 
 image_source = image_source.astype(np.float32)
 image_target = image_target.astype(np.float32)
 
-# obtain target label
+# target image label and confidence graph
 preds = fmodel.predictions(image_target)
 label_target = int(np.argmax(preds))
 
 print("target label: " + str(label_target))
 print("confidence: " + str(fmodel.compute_max_probability(preds, "benign")))
+
+# source image label and confidence graph
+preds_source = fmodel.predictions(image_source)
+label_source = int(np.argmax(preds_source))
+
+print("source label: " + str(label_source))
+print("confidence: " + str(fmodel.compute_max_probability(preds_source, "source_image")))
+save_image("/Users/mmatak/dev/thesis/adversarial_framework/results/source_image.jpg", image_source)
 
 attack = foolbox.attacks.BoundaryAttack(fmodel, criterion=foolbox.criteria.TargetClass(label_target))
 adversarial = attack(input_or_adv=image_source, label=1, starting_point=image_target, verbose=True, iterations=NUM_ITERATIONS)
