@@ -18,11 +18,11 @@ random.seed(111)
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/vgg16-16.603-11.255-sgd.hdf5'
+MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/inceptionResNetV2-3.927-10.929.hdf5'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 #MODEL_PATH = '/root/adversarial_framework/model/sub_model_after_epoch5.h5'
 #TEST_SET_PATH = '/root/datasets/appa-real-release-100'
-IMAGE_SIZE = 224
+IMAGE_SIZE = 299
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
 
@@ -57,6 +57,7 @@ def bbox_predict(wrap, data, sess, x, batch_size=1):
         predictions_new = model_argmax(sess, x, wrap.get_logits(x), data[:batch_size])
         predictions = np.hstack([predictions, predictions_new])
         data = data[batch_size:]
+    print("predictions: ")
     print(predictions)
     return predictions
 
@@ -98,9 +99,9 @@ diff_L2 = []
 
 img_ids = [str("00" + str(i)) for i in range(5613, 7613)]
 id_index = 0
-#
-# TEN_LABEL = convert_to_one_hot(10, NB_CLASSES)
-# NINETY_LABEL = convert_to_one_hot(90, NB_CLASSES)
+
+TEN_LABEL = convert_to_one_hot(10, NB_CLASSES)
+NINETY_LABEL = convert_to_one_hot(90, NB_CLASSES)
 for legit_sample, legit_label in test_generator:
 
     ground_truth = np.argmax(legit_label)
@@ -127,6 +128,7 @@ result_labels = [int(label / int(101 / NB_CLASSES)) for label in result_labels]
 
 sub_adv_generator = TransferGenerator(result_data, result_labels, NB_CLASSES, BATCH_SIZE, IMAGE_SIZE)
 evaluate_generator(wrap.model, sub_adv_generator, EVAL_BATCH_SIZE)
+bbox_predict(wrap, result_data, sess, x)
 
 
 sess.close()

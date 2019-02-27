@@ -2,7 +2,7 @@ import numpy as np
 from keras import backend as K
 from keras.utils import to_categorical
 from keras.applications import ResNet50, VGG16
-from keras.layers import Dense, Flatten, Activation, Conv2D, MaxPooling2D, Dropout
+from keras.layers import Dense, Flatten, Activation, Conv2D
 from keras.models import Model, Sequential
 
 def model_argmax(sess, x, predictions, samples, feed=None):
@@ -43,7 +43,6 @@ def evaluate_generator(model, generator, batch_size):
 
 
 def evaluate(model, x_test, y_test, batch_size):
-    print(y_test)
     result = model.evaluate(x_test, y_test, batch_size, verbose=1)
 
     print(model.metrics_names[1] + ": " + str(result[1]))
