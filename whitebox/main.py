@@ -18,7 +18,7 @@ random.seed(111)
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/inceptionResNetV2-3.927-10.929.hdf5'
+MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/InceptionResNetV2-adam-3.268-3.922.hdf5'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 #MODEL_PATH = '/root/adversarial_framework/model/sub_model_after_epoch5.h5'
 #TEST_SET_PATH = '/root/datasets/appa-real-release-100'
@@ -36,8 +36,8 @@ print("Session initialized")
 # load model
 model = load_model(MODEL_PATH, compile=False)
 
-#model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
-model.compile(optimizer=rmsprop(lr=0.0001, decay=1e-6), loss="categorical_crossentropy", metrics=['accuracy'])
+model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
+#model.compile(optimizer=rmsprop(lr=0.0001, decay=1e-6), loss="categorical_crossentropy", metrics=['accuracy'])
 
 print("Model loaded")
 
@@ -71,7 +71,7 @@ evaluate_generator(model, clean_generator, EVAL_BATCH_SIZE)
 
 # pick the attack
 attack = 'fgsm'
-#attack = 'cw'
+attack = 'cw'
 
 # not working because of memory consumption
 #attack = 'jsma'
@@ -107,9 +107,9 @@ for legit_sample, legit_label in test_generator:
     ground_truth = np.argmax(legit_label)
 
     if ground_truth > 50:
-        adv_x = attack_instance.attack(legit_sample, None, attack_instance_graph)
+        adv_x = attack_instance.attack(legit_sample, TEN_LABEL, attack_instance_graph)
     else:
-        adv_x = attack_instance.attack(legit_sample, None, attack_instance_graph)
+        adv_x = attack_instance.attack(legit_sample, NINETY_LABEL, attack_instance_graph)
 
     diff_L2.append(L2_distance(legit_sample, adv_x))
 
