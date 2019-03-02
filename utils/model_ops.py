@@ -49,6 +49,8 @@ def evaluate(model, x_test, y_test, batch_size):
 
 
 def age_mae(y_true, y_pred):
+    print("y true: " + str(y_true))
+    print("y pred: " + str(y_pred))
     true_age = K.sum(y_true * K.arange(0, 101, dtype="float32"), axis=-1)
     pred_age = K.sum(y_pred * K.arange(0, 101, dtype="float32"), axis=-1)
     mae = K.mean(K.abs(true_age - pred_age))
@@ -78,10 +80,10 @@ def get_model(model_name="ResNet50", num_classes = 101):
     return model
 
 
-def get_simple_model(num_classes):
+def get_simple_model(num_classes, image_size):
     nb_filters = 64
     model = Sequential()
-    model.add(Conv2D(nb_filters, (8, 8), padding='same', input_shape=(224, 224, 3)))
+    model.add(Conv2D(nb_filters, (8, 8), padding='same', input_shape=(image_size, image_size, 3)))
     model.add(Activation('relu'))
     model.add(Conv2D(nb_filters * 2, (6, 6), padding='valid'))
     model.add(Activation('relu'))

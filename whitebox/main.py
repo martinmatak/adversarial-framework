@@ -5,7 +5,7 @@ from utils.numpy_ops import convert_to_one_hot
 from whitebox.attacks import fgsm, cw, jsma
 
 from keras.optimizers import Adam, rmsprop
-from utils.model_ops import age_mae
+from utils.model_ops import age_mae, get_simple_model
 from keras.models import load_model
 from cleverhans.utils_keras import KerasModelWrapper
 from cleverhans.attacks import FastGradientMethod, CarliniWagnerL2, SaliencyMapMethod
@@ -19,7 +19,7 @@ random.seed(111)
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 32
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/InceptionResNetV2-adam-3.268-3.922.hdf5'
-TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
+TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
 #MODEL_PATH = '/root/adversarial_framework/model/sub_model_after_epoch5.h5'
 #TEST_SET_PATH = '/root/datasets/appa-real-release-100'
 IMAGE_SIZE = 299
@@ -34,7 +34,8 @@ keras.backend.set_session(sess)
 print("Session initialized")
 
 # load model
-model = load_model(MODEL_PATH, compile=False)
+#model = load_model(MODEL_PATH, compile=False)
+model = get_simple_model(NB_CLASSES, IMAGE_SIZE)
 
 model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
 #model.compile(optimizer=rmsprop(lr=0.0001, decay=1e-6), loss="categorical_crossentropy", metrics=['accuracy'])
