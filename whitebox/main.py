@@ -17,11 +17,11 @@ import random
 random.seed(111)
 
 BATCH_SIZE = 1
-EVAL_BATCH_SIZE = 32
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/InceptionResNetV2-adam-3.268-3.922.hdf5'
-TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
-#MODEL_PATH = '/root/adversarial_framework/model/sub_model_after_epoch5.h5'
-#TEST_SET_PATH = '/root/datasets/appa-real-release-100'
+EVAL_BATCH_SIZE = 4
+#MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/InceptionResNetV2-adam-3.268-3.922.hdf5'
+#TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
+MODEL_PATH = '/root/adversarial_framework/model/InceptionResNetV2-sgd-3.086-4.505.hdf5'
+TEST_SET_PATH = '/root/datasets/appa-real-release-100'
 IMAGE_SIZE = 299
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
@@ -34,8 +34,8 @@ keras.backend.set_session(sess)
 print("Session initialized")
 
 # load model
-#model = load_model(MODEL_PATH, compile=False)
-model = get_simple_model(NB_CLASSES, IMAGE_SIZE)
+model = load_model(MODEL_PATH, compile=False)
+#model = get_simple_model(NB_CLASSES, IMAGE_SIZE)
 
 model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
 #model.compile(optimizer=rmsprop(lr=0.0001, decay=1e-6), loss="categorical_crossentropy", metrics=['accuracy'])
