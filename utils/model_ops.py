@@ -50,14 +50,7 @@ def evaluate(model, x_test, y_test, batch_size):
 
 
 def age_mae(y_true, y_pred):
-    tf.print(y_true)
-    tf.print(y_pred)
-    true_age = K.sum(y_true * K.arange(0, 101, dtype="float32"), axis=-1)
-    tf.print(true_age)
-    pred_age = K.sum(y_pred * K.arange(0, 101, dtype="float32"), axis=-1)
-    tf.print(pred_age)
-    mae = K.mean(K.abs(true_age - pred_age))
-    return mae
+    return K.mean(K.abs(K.argmax(y_true, axis=-1) - K.argmax(y_pred, axis=-1)))
 
 
 def train_model(model, data, labels, nb_classes):

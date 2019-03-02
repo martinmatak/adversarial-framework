@@ -12,16 +12,17 @@ from cleverhans.attacks import FastGradientMethod, CarliniWagnerL2, SaliencyMapM
 import keras
 import tensorflow as tf
 import numpy as np
+import time
 import random
 
 random.seed(111)
 
 BATCH_SIZE = 1
-EVAL_BATCH_SIZE = 4
-#MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/InceptionResNetV2-adam-3.268-3.922.hdf5'
-#TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
-MODEL_PATH = '/root/adversarial_framework/model/InceptionResNetV2-sgd-3.086-4.505.hdf5'
-TEST_SET_PATH = '/root/datasets/appa-real-release-100'
+EVAL_BATCH_SIZE = 1
+MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/InceptionResNetV2-adam-3.268-3.922.hdf5'
+TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
+#MODEL_PATH = '/root/adversarial_framework/model/InceptionResNetV2-sgd-3.086-4.505.hdf5'
+#TEST_SET_PATH = '/root/datasets/appa-real-release-100'
 IMAGE_SIZE = 299
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
@@ -72,7 +73,7 @@ evaluate_generator(model, clean_generator, EVAL_BATCH_SIZE)
 
 # pick the attack
 attack = 'fgsm'
-attack = 'cw'
+#attack = 'cw'
 
 # not working because of memory consumption
 #attack = 'jsma'
@@ -118,7 +119,6 @@ for legit_sample, legit_label in test_generator:
     id_index += 1
 
 print("Average L2 perturbation summed by channels: ", str(sum(diff_L2) / float(len(diff_L2))))
-
 print("Loading adversarial samples...")
 result_bbox_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE)
 
