@@ -4,6 +4,7 @@ from keras.utils import to_categorical
 from keras.applications import ResNet50, VGG16
 from keras.layers import Dense, Flatten, Activation, Conv2D
 from keras.models import Model, Sequential
+import tensorflow as tf
 
 def model_argmax(sess, x, predictions, samples, feed=None):
     """
@@ -49,10 +50,12 @@ def evaluate(model, x_test, y_test, batch_size):
 
 
 def age_mae(y_true, y_pred):
-    print("y true: " + str(y_true))
-    print("y pred: " + str(y_pred))
+    tf.print(y_true)
+    tf.print(y_pred)
     true_age = K.sum(y_true * K.arange(0, 101, dtype="float32"), axis=-1)
+    tf.print(true_age)
     pred_age = K.sum(y_pred * K.arange(0, 101, dtype="float32"), axis=-1)
+    tf.print(pred_age)
     mae = K.mean(K.abs(true_age - pred_age))
     return mae
 
