@@ -4,7 +4,6 @@ from keras.utils import to_categorical
 from keras.applications import ResNet50, VGG16
 from keras.layers import Dense, Flatten, Activation, Conv2D
 from keras.models import Model, Sequential
-import tensorflow as tf
 
 def model_argmax(sess, x, predictions, samples, feed=None):
     """

@@ -4,15 +4,14 @@ from utils.model_ops import evaluate_generator, get_dataset, model_argmax
 from utils.numpy_ops import convert_to_one_hot
 from whitebox.attacks import fgsm, cw, jsma
 
-from keras.optimizers import Adam, rmsprop
-from utils.model_ops import age_mae, get_simple_model
+from keras.optimizers import Adam
+from utils.model_ops import age_mae
 from keras.models import load_model
 from cleverhans.utils_keras import KerasModelWrapper
 from cleverhans.attacks import FastGradientMethod, CarliniWagnerL2, SaliencyMapMethod
 import keras
 import tensorflow as tf
 import numpy as np
-import time
 import random
 
 random.seed(111)
@@ -20,7 +19,7 @@ random.seed(111)
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/InceptionResNetV2-adam-3.268-3.922.hdf5'
-TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
+TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 #MODEL_PATH = '/root/adversarial_framework/model/InceptionResNetV2-sgd-3.086-4.505.hdf5'
 #TEST_SET_PATH = '/root/datasets/appa-real-release-100'
 IMAGE_SIZE = 299
@@ -72,8 +71,8 @@ clean_generator = TransferGenerator(data, labels, NB_CLASSES, BATCH_SIZE, IMAGE_
 evaluate_generator(model, clean_generator, EVAL_BATCH_SIZE)
 
 # pick the attack
-attack = 'fgsm'
-#attack = 'cw'
+#attack = 'fgsm'
+attack = 'cw'
 
 # not working because of memory consumption
 #attack = 'jsma'
