@@ -29,3 +29,14 @@ for i in range(0, 30):
             end = time.time()
             print("I'm awake! I slept for " + str(end - start) + " seconds.")
 
+
+def predict(image):
+    '''
+    Queries MS API for face detection.
+    :param image: image path (or URL) or image (as file)
+    :return: how old a person in the image is, type: int
+    '''
+    faces = CF.face.detect(image, face_id=False, landmarks=False, attributes='age')
+    age = faces[0]['faceAttributes']['age']
+    return int(age)
+

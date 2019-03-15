@@ -20,10 +20,10 @@ from utils.generator import TestGenerator, TransferGenerator, CustomGenerator
 from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_simple_model, get_model, save_model
 
 # prototype constants
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
+MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/resources/models/resnet50-3.436-5.151-sgd.hdf5'
 TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
-NUM_EPOCHS_SUB = 40
+NUM_EPOCHS_SUB = 1
 ADV_ID_START = 5615
 ADV_ID_END = 7613
 NB_SUB_CLASSES = 5
