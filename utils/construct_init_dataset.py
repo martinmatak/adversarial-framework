@@ -2,14 +2,14 @@ import pandas as pd
 import random as rng
 
 csv_path = '/Users/mmatak/dev/thesis/datasets/appa-real-release/gt_avg_test.csv'
-csv_path = '/root/datasets/appa-real-release/gt_avg_test.csv'
+#csv_path = '/root/datasets/appa-real-release/gt_avg_test.csv'
 num_of_categories = 5
 
 age_span_per_category = int(101/int(num_of_categories))
 print("age span per category: ", age_span_per_category)
 
 total_dataset_size = 500
-attack_dataset_size = 100
+attack_dataset_size = 200
 start_age = 0
 max_age = 100
 current_age = start_age
@@ -75,7 +75,7 @@ if False:
 for category in num_of_samples_per_category.keys():
     print("Category: " + str(category) + ", num of samples: " + str(num_of_samples_per_category[category]))
 
-print("Total number of samples: ", total_samples)
+print("Total number of training samples: ", total_samples)
 
 print("file_name,apparent_age_avg", file=open("custom-dataset.csv", "w"))
 for filename in files_to_take:
@@ -83,10 +83,12 @@ for filename in files_to_take:
 
 print("constructing set of samples for attack now...")
 current_size = 0
+df = pd.read_csv(str(csv_path))
+
 attack_set = set()
-while size(attack_set) < attack_dataset_size:
-    row = df[rng.randint(0, df.size())]
-    file_age = str(row.file_name) + "," + str(age)
+while len(attack_set) < attack_dataset_size:
+    row = df.iloc[rng.randint(0, df.shape[0])]
+    file_age = str(row.file_name) + "," + str(min(max_age, int(row.apparent_age_avg)))
     # if in training dataset, skip sample
     if file_age in files_to_take:
         continue
@@ -98,3 +100,4 @@ print("file_name,apparent_age_avg", file=open(attack_filename, "w"))
 for filename in attack_set:
     print(filename, file = open(attack_filename, "a"))
 print("Attack samples stored in " + attack_filename)
+print("Total number of attack samples: " + str(len(attack_set)))
