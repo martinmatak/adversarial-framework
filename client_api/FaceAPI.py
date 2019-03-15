@@ -8,6 +8,7 @@ import tempfile
 
 
 KEY = '1f96348454f1477bbfc2ca94de97c329'  # Replace with a valid subscription key (keeping the quotes in place).
+# Key 2: e392dfc9f2974811a80c979d9e968518
 CF.Key.set(KEY)
 
 BASE_URL = 'https://westcentralus.api.cognitive.microsoft.com/face/v1.0/'  # Replace with your regional Base URL
