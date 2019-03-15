@@ -16,4 +16,54 @@ from the dataset above, transferability is like this:
 
 
 
-
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005613.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005614.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005615.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005616.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005617.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005618.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005619.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005620.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005621.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005622.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005623.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005624.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005625.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005626.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005627.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005628.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005629.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005630.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005631.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005632.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005633.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005634.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005635.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005636.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005637.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005638.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005639.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005640.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005641.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005642.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005643.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005644.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005645.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005646.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005647.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005648.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005649.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005650.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005651.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005652.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005653.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005654.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005655.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005656.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005657.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005658.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005659.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005660.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005661.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005662.jpg_face.jpg
+saving /Users/mmatak/dev/thesis/datasets/appa-real-release-100-adv/whitebox/cw//test/005663.jpg_face.jpg

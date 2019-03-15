@@ -1,7 +1,6 @@
 __pycache__/
 .idea/
 venv/
-model/
 results/
 .DS_Store
-models/
+resources/models/
