@@ -92,7 +92,6 @@ class TransferGenerator(Sequence):
         np.random.shuffle(self.indices)
 
 
-
 class CustomGenerator(Sequence):
     def __init__(self, csv_path, num_classes, batch_size=32, image_size=224):
         self.image_path_and_age = []

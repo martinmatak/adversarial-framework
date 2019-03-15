@@ -1,11 +1,15 @@
 import tensorflow as tf
 import keras
+import tempfile
 import numpy as np
-from keras.optimizers import Adam
+import os
 
+from keras.optimizers import Adam
+from PIL import Image
 from six.moves import xrange
 
 from keras.models import load_model
+from client_api import FaceAPI
 
 from cleverhans.attacks import FastGradientMethod,  CarliniWagnerL2
 from cleverhans.attacks_tf import jacobian_graph, jacobian_augmentation
@@ -19,7 +23,7 @@ from utils.generator import TestGenerator, TransferGenerator
 from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_model
 
 # prototype constants
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/resnet50-3.436-5.151-sgd.hdf5'
+MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/resources/models/resnet50-3.436-5.151-sgd.hdf5'
 TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-2'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
 NUM_EPOCHS = 1
@@ -53,13 +57,23 @@ def prep_bbox():
     return wrap
 
 
-def bbox_predict(model, data, sess, x, batch_size=1):
+def predictExternalAPI(np_image):
+    return np.array(FaceAPI.predict_from_numpy(np_image))
+
+
+def bbox_predict(model, data, sess, x, batch_size=1, faceAPI = False):
     # here comes API call or anything similar
     print("Num of queries to bbox: " + str(len(data)))
-    predictions = model_argmax(sess, x, model.get_logits(x), data[:batch_size])
+    if faceAPI:
+        predictions = predictExternalAPI(data[:1][0, :, :, :])
+    else:
+        predictions = model_argmax(sess, x, model.get_logits(x), data[:batch_size])
     data = data[batch_size:]
     while len(data) > 0:
-        predictions_new = model_argmax(sess, x, model.get_logits(x), data[:batch_size])
+        if faceAPI:
+            predictions_new = predictExternalAPI(data[:1][0, :, :, :])
+        else:
+            predictions_new = model_argmax(sess, x, model.get_logits(x), data[:batch_size])
         predictions = np.hstack([predictions, predictions_new])
         data = data[batch_size:]
     print(predictions)
@@ -121,6 +135,7 @@ def train_sub(data_aug, sess,
             y_sub[int(len(x_sub)/2):] = predictions
     return model_sub
 
+
 def train_sub_no_augmn(data, target_model, sess):
     print("Loading a substitute model...")
 
@@ -133,22 +148,22 @@ def train_sub_no_augmn(data, target_model, sess):
     print("Substitute model loaded")
 
     print("Labeling samples...")
-    labels = bbox_predict(target_model, data, sess, x, batch_size=1)
+    labels = bbox_predict(target_model, data, sess, x, batch_size=1, faceAPI=True)
     print("Samples labeled")
 
 
     print("Training a substitute model...")
-    train_gen = TransferGenerator(data, labels , BATCH_SIZE, IMAGE_SIZE, encoding_needed=False)
-    model_sub.model.fit_generator(generator=train_gen, epochs=NUM_EPOCHS)
+    train_gen = TransferGenerator(data, labels , BATCH_SIZE, IMAGE_SIZE)
+    model_sub.model.fit_generator(generator=train_gen, epochs=NUM_EPOCHS, verbose=0)
     print("Subsitute model trained")
 
     return model_sub
 
 def generate_adv_samples(wrap, generator, sess):
-    #attack_instance_graph = FastGradientMethod(wrap, sess)
-    #attack_instance = fgsm
-    attack_instance_graph = CarliniWagnerL2(wrap, sess)
-    attack_instance = cw
+    attack_instance_graph = FastGradientMethod(wrap, sess)
+    attack_instance = fgsm
+    # attack_instance_graph = CarliniWagnerL2(wrap, sess)
+    # attack_instance = cw
 
     diff_L2 = []
 
@@ -186,9 +201,9 @@ def blackbox(sess):
     # train substitute using method from https://arxiv.org/abs/1602.02697
     print("Training the substitute model by querying the target network..")
     data, labels = get_dataset(TestGenerator(TRAINING_SET_PATH, BATCH_SIZE, IMAGE_SIZE))
-    #substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
-    labels = [np.argmax(label, axis=None, out=None) for label in labels]
-    substitute = train_sub(data_aug=6, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
+    substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
+    # labels = [np.argmax(label, axis=None, out=None) for label in labels]
+    # substitute = train_sub(data_aug=6, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
     test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
