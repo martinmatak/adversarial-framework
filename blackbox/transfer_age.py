@@ -24,24 +24,19 @@ from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argm
 
 # prototype constants
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/resources/models/resnet50-3.436-5.151-sgd.hdf5'
-TRAINING_SAMPLES_NAMES = 'resources/custom-dataset.csv'
-TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-2'
-TEST_SAMPLES_NAMES = 'resources/attack-samples.csv'
-TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
+DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
+TRAINING_SAMPLES_NAMES = 'resources/test-custom-dataset.csv'
+TEST_SAMPLES_NAMES = 'resources/test-attack-samples.csv'
 NUM_EPOCHS = 1
-ADV_ID_START = 5615
-ADV_ID_END = 7613
+ATTACK_NAME = 'fgsm'
+ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
 
 # remote constants
 #MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
-#TRAINING_SET_PATH = '/root/datasets/appa-real-release-1000'
+#DATASET_PATH = '/root/datasets/appa-real-release-1000'
 #TEST_SET_PATH = '/root/datasets/appa-real-release-100'
 #NUM_EPOCHS = 40
-#ADV_ID_START = 5613
-#ADV_ID_END = 7613
 
-
-RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/fgsm/'
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1
@@ -161,15 +156,17 @@ def train_sub_no_augmn(data, target_model, sess):
 
 
 def generate_adv_samples(wrap, generator, sess):
-    attack_instance_graph = FastGradientMethod(wrap, sess)
-    attack_instance = fgsm
-    # attack_instance_graph = CarliniWagnerL2(wrap, sess)
-    # attack_instance = cw
+    if ATTACK_NAME == 'fgsm':
+        attack_instance_graph = FastGradientMethod(wrap, sess)
+        attack_instance = fgsm
+    else:
+        attack_instance_graph = CarliniWagnerL2(wrap, sess)
+        attack_instance = cw
 
     diff_L2 = []
 
-    img_ids = [str("00" + str(i)) for i in range(ADV_ID_START, ADV_ID_END)]
-    id_index = 0
+    file_names = generator.get_file_names()
+    image_index = 0
 
     TEN_LABEL = convert_to_one_hot(10, NB_CLASSES)
     NINETY_LABEL = convert_to_one_hot(90, NB_CLASSES)
@@ -184,8 +181,8 @@ def generate_adv_samples(wrap, generator, sess):
 
         diff_L2.append(L2_distance(legit_sample, adv_x))
 
-        save_image(RESULT_PATH + '/test/' + img_ids[id_index] + ".jpg_face.jpg", adv_x[0, :, :, :])
-        id_index += 1
+        save_image(ADV_DATASET_PATH + 'test/' + file_names[image_index], adv_x[0, :, :, :])
+        image_index += 1
 
     print("Average L2 perturbation summed by channels: ", str(sum(diff_L2) / float(len(diff_L2))))
 
@@ -197,13 +194,13 @@ def blackbox(sess):
 
     # train substitute using method from https://arxiv.org/abs/1602.02697
     print("Training the substitute model by querying the target network..")
-    data, labels = get_dataset(TestGenerator(TRAINING_SET_PATH, BATCH_SIZE, IMAGE_SIZE, TRAINING_SAMPLES_NAMES))
+    data, labels = get_dataset(TestGenerator(DATASET_PATH, BATCH_SIZE, IMAGE_SIZE, TRAINING_SAMPLES_NAMES))
     substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
     # labels = [np.argmax(label, axis=None, out=None) for label in labels]
     # substitute = train_sub(data_aug=6, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
-    test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE, TEST_SAMPLES_NAMES)
+    test_generator = TestGenerator(DATASET_PATH, BATCH_SIZE, IMAGE_SIZE, TEST_SAMPLES_NAMES)
     evaluate_generator(substitute.model, test_generator, EVAL_BATCH_SIZE)
 
     print("Evaluating the accuracy of the black-box model on clean examples...")
@@ -213,7 +210,7 @@ def blackbox(sess):
     generate_adv_samples(substitute, test_generator, sess)
 
     print("Loading adversarial samples...")
-    result_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE)
+    result_generator = TestGenerator(ADV_DATASET_PATH, BATCH_SIZE, IMAGE_SIZE, TEST_SAMPLES_NAMES)
 
     print("Evaluating the accuracy of the substitute model on adversarial examples...")
     evaluate_generator(substitute.model, result_generator, EVAL_BATCH_SIZE)

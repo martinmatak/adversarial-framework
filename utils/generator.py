@@ -2,13 +2,15 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import cv2
+import os
 from keras.utils import Sequence, to_categorical
 
 
 class TestGenerator(Sequence):
 
-    def __init__(self, appa_dir, batch_size=32, image_size=224, chosen_samples_path = None):
+    def __init__(self, appa_dir, batch_size=32, image_size=224, chosen_samples_path=None):
         self.image_path_and_age = []
+        self.file_names = []
         self._load_appa(appa_dir, chosen_samples_path)
         self.image_num = len(self.image_path_and_age)
         self.batch_size = batch_size
@@ -37,7 +39,9 @@ class TestGenerator(Sequence):
         if chosen_samples_path is None:
             gt_val_path = appa_root.joinpath("gt_avg_test.csv")
         else:
-            gt_val_path = Path(chosen_samples_path)
+            root_dir = os.path.dirname(os.path.dirname(__file__))
+            target_file_path = os.path.join(root_dir, chosen_samples_path)
+            gt_val_path = Path(target_file_path)
         df = pd.read_csv(str(gt_val_path))
 
         for i, row in df.iterrows():
@@ -48,6 +52,10 @@ class TestGenerator(Sequence):
 
             if image_path.is_file():
                 self.image_path_and_age.append([str(image_path), age])
+                self.file_names.append(file_name)
+
+    def get_file_names(self):
+        return self.file_names
 
 
 class TransferGenerator(Sequence):
