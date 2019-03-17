@@ -39,7 +39,7 @@ ADV_ID_END = 7613
 #ADV_ID_END = 7613
 
 
-RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/cw/'
+RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/fgsm/'
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1
@@ -57,7 +57,7 @@ def prep_bbox():
     return wrap
 
 
-def predictExternalAPI(np_image):
+def predict_external_api(np_image):
     return np.array(FaceAPI.predict_from_numpy(np_image))
 
 
@@ -65,13 +65,13 @@ def bbox_predict(model, data, sess, x, batch_size=1, faceAPI = False):
     # here comes API call or anything similar
     print("Num of queries to bbox: " + str(len(data)))
     if faceAPI:
-        predictions = predictExternalAPI(data[:1][0, :, :, :])
+        predictions = predict_external_api(data[:1][0, :, :, :])
     else:
         predictions = model_argmax(sess, x, model.get_logits(x), data[:batch_size])
     data = data[batch_size:]
     while len(data) > 0:
         if faceAPI:
-            predictions_new = predictExternalAPI(data[:1][0, :, :, :])
+            predictions_new = predict_external_api(data[:1][0, :, :, :])
         else:
             predictions_new = model_argmax(sess, x, model.get_logits(x), data[:batch_size])
         predictions = np.hstack([predictions, predictions_new])
@@ -84,7 +84,6 @@ def train_sub(data_aug, sess,
               x_sub, y_sub, lmbda, target_model, aug_batch_size=1):
     x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE,
                                           NUM_OF_CHANNELS))
-
     print("Loading substitute model...")
     model = get_model()
     model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
@@ -98,10 +97,10 @@ def train_sub(data_aug, sess,
     grads = jacobian_graph(preds_sub, x, NB_CLASSES)
     print("Jacobian graph defined.")
 
-    train_gen = TransferGenerator(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE, encoding_needed=False)
+    train_gen = TransferGenerator(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE)
     for rho in xrange(data_aug):
         print("Substitute training epoch #" + str(rho))
-        train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE, encoding_needed=False)
+        train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE)
         model_sub.model.fit_generator(generator=train_gen, epochs=1)
 
         input_sample = np.empty(shape=(1, IMAGE_SIZE, IMAGE_SIZE, NUM_OF_CHANNELS), dtype=np.float32)
@@ -148,9 +147,8 @@ def train_sub_no_augmn(data, target_model, sess):
     print("Substitute model loaded")
 
     print("Labeling samples...")
-    labels = bbox_predict(target_model, data, sess, x, batch_size=1, faceAPI=True)
+    labels = bbox_predict(target_model, data, sess, x, batch_size=1)
     print("Samples labeled")
-
 
     print("Training a substitute model...")
     train_gen = TransferGenerator(data, labels , BATCH_SIZE, IMAGE_SIZE)
@@ -158,6 +156,7 @@ def train_sub_no_augmn(data, target_model, sess):
     print("Subsitute model trained")
 
     return model_sub
+
 
 def generate_adv_samples(wrap, generator, sess):
     attack_instance_graph = FastGradientMethod(wrap, sess)
@@ -190,10 +189,6 @@ def generate_adv_samples(wrap, generator, sess):
 
 
 def blackbox(sess):
-
-    # Seed random number generator so results are reproducible
-    rng = np.random.RandomState([2019, 1, 30])
-
     # simulate the black-box model locally
     print("Preparing the black-box model.")
     target = prep_bbox()
@@ -225,7 +220,7 @@ def blackbox(sess):
     evaluate_generator(target.model, result_generator, EVAL_BATCH_SIZE)
 
 
-def main(argv=None):
+def main():
     sess = tf.Session()
     keras.backend.set_session(sess)
     print("Session initialized")
