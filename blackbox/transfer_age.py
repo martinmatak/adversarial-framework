@@ -25,7 +25,7 @@ DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
 NUM_EPOCHS = 1
 
 # remote constants
-# DATASET_PATH = '/root/datasets/appa-real-release/'
+DATASET_PATH = '/root/datasets/appa-real-release'
 #NUM_EPOCHS = 40
 
 
