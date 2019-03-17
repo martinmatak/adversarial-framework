@@ -1,11 +1,9 @@
 import tensorflow as tf
 import keras
-import tempfile
 import numpy as np
 import os
 
 from keras.optimizers import Adam
-from PIL import Image
 from six.moves import xrange
 
 from keras.models import load_model
@@ -20,33 +18,40 @@ from whitebox.attacks import fgsm, cw
 from utils.image_ops import L2_distance, save_image
 from utils.numpy_ops import convert_to_one_hot
 from utils.generator import TestGenerator, TransferGenerator
-from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_model
+from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_model, get_simple_model
 
 # prototype constants
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/resources/models/resnet50-3.436-5.151-sgd.hdf5'
 DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
-TRAINING_SAMPLES_NAMES = 'resources/test-custom-dataset.csv'
-TEST_SAMPLES_NAMES = 'resources/test-attack-samples.csv'
 NUM_EPOCHS = 1
-ATTACK_NAME = 'fgsm'
-ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
 
 # remote constants
-#MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
-#DATASET_PATH = '/root/datasets/appa-real-release-1000'
-#TEST_SET_PATH = '/root/datasets/appa-real-release-100'
+# DATASET_PATH = '/root/datasets/appa-real-release/'
 #NUM_EPOCHS = 40
+
+
+TRAINING_SAMPLES_NAMES = 'resources/test-custom-dataset.csv'
+TEST_SAMPLES_NAMES = 'resources/test-attack-samples.csv'
+MODEL_PATH = 'resources/models/InceptionResNetV2-adam-3.268-3.922.hdf5'
+
+ATTACK_NAME = 'fgsm'
+ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
 
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1
-IMAGE_SIZE = 224
+IMAGE_SIZE = 299
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
 
 
+
 def prep_bbox():
-    model = load_model(MODEL_PATH, compile=False)
+    root_dir = os.path.dirname(os.path.dirname(__file__))
+    relative_path = os.path.join(root_dir, MODEL_PATH)
+    model = load_model(relative_path, compile=False)
+
+    #model = get_simple_model(num_classes=NB_CLASSES, image_size=IMAGE_SIZE)
+
 
     model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
     wrap = KerasModelWrapper(model)
@@ -82,7 +87,8 @@ def train_sub(data_aug, sess,
     x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE,
                                           NUM_OF_CHANNELS))
     print("Loading substitute model...")
-    model = get_model()
+    model = get_model("InceptionResNetV2")
+    # model = get_simple_model(num_classes=NB_CLASSES, image_size=IMAGE_SIZE)
     model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
     model_sub = KerasModelWrapper(model)
 
