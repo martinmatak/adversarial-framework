@@ -7,9 +7,9 @@ from keras.utils import Sequence, to_categorical
 
 class TestGenerator(Sequence):
 
-    def __init__(self, appa_dir, batch_size=32, image_size=224):
+    def __init__(self, appa_dir, batch_size=32, image_size=224, chosen_samples_path = None):
         self.image_path_and_age = []
-        self._load_appa(appa_dir)
+        self._load_appa(appa_dir, chosen_samples_path)
         self.image_num = len(self.image_path_and_age)
         self.batch_size = batch_size
         self.image_size = image_size
@@ -31,16 +31,20 @@ class TestGenerator(Sequence):
 
         return x, to_categorical(y, 101)
 
-    def _load_appa(self, appa_dir):
+    def _load_appa(self, appa_dir, chosen_samples_path):
         appa_root = Path(appa_dir)
         val_image_dir = appa_root.joinpath("test")
-        gt_val_path = appa_root.joinpath("gt_avg_test.csv")
+        if chosen_samples_path is None:
+            gt_val_path = appa_root.joinpath("gt_avg_test.csv")
+        else:
+            gt_val_path = Path(chosen_samples_path)
         df = pd.read_csv(str(gt_val_path))
 
         for i, row in df.iterrows():
             age = min(99, int(row.apparent_age_avg))
             # age = int(row.real_age)
-            image_path = val_image_dir.joinpath(row.file_name + "_face.jpg")
+            file_name = row.file_name + "_face.jpg"
+            image_path = val_image_dir.joinpath(file_name)
 
             if image_path.is_file():
                 self.image_path_and_age.append([str(image_path), age])

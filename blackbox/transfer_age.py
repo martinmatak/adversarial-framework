@@ -24,7 +24,9 @@ from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argm
 
 # prototype constants
 MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/resources/models/resnet50-3.436-5.151-sgd.hdf5'
+TRAINING_SAMPLES_NAMES = 'resources/custom-dataset.csv'
 TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-2'
+TEST_SAMPLES_NAMES = 'resources/attack-samples.csv'
 TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
 NUM_EPOCHS = 1
 ADV_ID_START = 5615
@@ -151,7 +153,7 @@ def train_sub_no_augmn(data, target_model, sess):
     print("Samples labeled")
 
     print("Training a substitute model...")
-    train_gen = TransferGenerator(data, labels , BATCH_SIZE, IMAGE_SIZE)
+    train_gen = TransferGenerator(data, labels, BATCH_SIZE, IMAGE_SIZE)
     model_sub.model.fit_generator(generator=train_gen, epochs=NUM_EPOCHS, verbose=0)
     print("Subsitute model trained")
 
@@ -195,13 +197,13 @@ def blackbox(sess):
 
     # train substitute using method from https://arxiv.org/abs/1602.02697
     print("Training the substitute model by querying the target network..")
-    data, labels = get_dataset(TestGenerator(TRAINING_SET_PATH, BATCH_SIZE, IMAGE_SIZE))
+    data, labels = get_dataset(TestGenerator(TRAINING_SET_PATH, BATCH_SIZE, IMAGE_SIZE, TRAINING_SAMPLES_NAMES))
     substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
     # labels = [np.argmax(label, axis=None, out=None) for label in labels]
     # substitute = train_sub(data_aug=6, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
-    test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
+    test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE, TEST_SAMPLES_NAMES)
     evaluate_generator(substitute.model, test_generator, EVAL_BATCH_SIZE)
 
     print("Evaluating the accuracy of the black-box model on clean examples...")
