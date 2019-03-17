@@ -1,7 +1,7 @@
 import numpy as np
 from keras import backend as K
 from keras.utils import to_categorical
-from keras.applications import ResNet50, VGG16
+from keras.applications import ResNet50, VGG16, InceptionResNetV2
 from keras.layers import Dense, Flatten, Activation, Conv2D
 from keras.models import Model, Sequential
 
@@ -59,21 +59,29 @@ def train_model(model, data, labels, nb_classes):
     return model
 
 
-def get_model(model_name="ResNet50", num_classes = 101):
+def get_model(model_name, num_of_classes=101):
     base_model = None
 
     if model_name == "ResNet50":
         base_model = ResNet50(include_top=False, weights='imagenet', input_shape=(224, 224, 3), pooling="avg")
+        output = base_model.output
     elif model_name == "VGG16":
         base_model = VGG16(include_top=False, weights='imagenet', input_shape=(224, 224, 3), pooling="avg")
+        x = base_model.output
+        output = Dense(1024, activation='relu')(x)
+        output = Dense(1024, activation='relu')(output)
+    elif model_name == "InceptionResNetV2":
+        base_model = InceptionResNetV2(include_top=False, weights='imagenet', input_shape=(299, 299, 3), pooling="avg")
+        output = base_model.output
+    else:
+        print("model not supported")
+        exit(1)
 
-    prediction = Dense(units=num_classes, kernel_initializer="he_normal", use_bias=False, activation="softmax",
-                       name="pred_age")(base_model.output)
+    prediction = Dense(units=num_of_classes, kernel_initializer="he_normal", use_bias=False, activation="softmax",
+                       name="pred_age")(output)
 
     model = Model(inputs=base_model.input, outputs=prediction)
-
     return model
-
 
 def get_simple_model(num_classes, image_size):
     nb_filters = 64

@@ -94,10 +94,10 @@ def train_sub(data_aug, sess,
     grads = jacobian_graph(preds_sub, x, NB_CLASSES)
     print("Jacobian graph defined.")
 
-    train_gen = TransferGenerator(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE)
+    train_gen = TransferGenerator(x_sub, y_sub, num_classes=101, batch_size=BATCH_SIZE, image_size=IMAGE_SIZE)
     for rho in xrange(data_aug):
         print("Substitute training epoch #" + str(rho))
-        train_gen.reinitialize(x_sub, y_sub, BATCH_SIZE, IMAGE_SIZE)
+        train_gen.reinitialize(data=x_sub, labels=y_sub, batch_size=BATCH_SIZE, image_size=IMAGE_SIZE)
         model_sub.model.fit_generator(generator=train_gen, epochs=1)
 
         input_sample = np.empty(shape=(1, IMAGE_SIZE, IMAGE_SIZE, NUM_OF_CHANNELS), dtype=np.float32)
@@ -195,9 +195,9 @@ def blackbox(sess):
     # train substitute using method from https://arxiv.org/abs/1602.02697
     print("Training the substitute model by querying the target network..")
     data, labels = get_dataset(TestGenerator(DATASET_PATH, BATCH_SIZE, IMAGE_SIZE, TRAINING_SAMPLES_NAMES))
-    substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
-    # labels = [np.argmax(label, axis=None, out=None) for label in labels]
-    # substitute = train_sub(data_aug=6, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
+    #substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
+    labels = [np.argmax(label, axis=None, out=None) for label in labels]
+    substitute = train_sub(data_aug=2, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
     test_generator = TestGenerator(DATASET_PATH, BATCH_SIZE, IMAGE_SIZE, TEST_SAMPLES_NAMES)

@@ -94,7 +94,6 @@ class TransferGenerator(Sequence):
 
 
     def reinitialize(self, data, labels, batch_size=32, image_size=224):
-        # encoding needed is TRUE if given labels are one hot encoded
         self.data = data
         self.labels = labels
         self.image_num = len(labels)

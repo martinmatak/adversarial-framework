@@ -8,7 +8,7 @@ num_of_categories = 5
 age_span_per_category = int(101/int(num_of_categories))
 print("age span per category: ", age_span_per_category)
 
-total_dataset_size = 500
+total_dataset_size = 1000
 attack_dataset_size = 200
 start_age = 0
 max_age = 100
