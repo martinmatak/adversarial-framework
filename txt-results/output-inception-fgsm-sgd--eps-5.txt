@@ -1,0 +1,231 @@
+Session initialized
+Model loaded
+Loading clean samples...
+Evaluating the accuracy of the model on clean examples...
+Dataset loaded
+Dataset loaded
+
+  1/100 [..............................] - ETA: 6:45
+  3/100 [..............................] - ETA: 2:14
+  5/100 [>.............................] - ETA: 1:20
+  7/100 [=>............................] - ETA: 57s 
+  9/100 [=>............................] - ETA: 44s
+ 11/100 [==>...........................] - ETA: 36s
+ 13/100 [==>...........................] - ETA: 30s
+ 15/100 [===>..........................] - ETA: 26s
+ 17/100 [====>.........................] - ETA: 22s
+ 19/100 [====>.........................] - ETA: 20s
+ 21/100 [=====>........................] - ETA: 18s
+ 23/100 [=====>........................] - ETA: 16s
+ 25/100 [======>.......................] - ETA: 14s
+ 27/100 [=======>......................] - ETA: 13s
+ 29/100 [=======>......................] - ETA: 12s
+ 31/100 [========>.....................] - ETA: 11s
+ 33/100 [========>.....................] - ETA: 10s
+ 35/100 [=========>....................] - ETA: 9s 
+ 37/100 [==========>...................] - ETA: 9s
+ 39/100 [==========>...................] - ETA: 8s
+ 41/100 [===========>..................] - ETA: 7s
+ 43/100 [===========>..................] - ETA: 7s
+ 45/100 [============>.................] - ETA: 6s
+ 47/100 [=============>................] - ETA: 6s
+ 49/100 [=============>................] - ETA: 6s
+ 51/100 [==============>...............] - ETA: 5s
+ 53/100 [==============>...............] - ETA: 5s
+ 55/100 [===============>..............] - ETA: 4s
+ 57/100 [================>.............] - ETA: 4s
+ 59/100 [================>.............] - ETA: 4s
+ 61/100 [=================>............] - ETA: 4s
+ 63/100 [=================>............] - ETA: 3s
+ 65/100 [==================>...........] - ETA: 3s
+ 67/100 [===================>..........] - ETA: 3s
+ 69/100 [===================>..........] - ETA: 2s
+ 71/100 [====================>.........] - ETA: 2s
+ 73/100 [====================>.........] - ETA: 2s
+ 75/100 [=====================>........] - ETA: 2s
+ 77/100 [======================>.......] - ETA: 2s
+ 79/100 [======================>.......] - ETA: 1s
+ 81/100 [=======================>......] - ETA: 1s
+ 83/100 [=======================>......] - ETA: 1s
+ 85/100 [========================>.....] - ETA: 1s
+ 87/100 [=========================>....] - ETA: 1s
+ 89/100 [=========================>....] - ETA: 0s
+ 91/100 [==========================>...] - ETA: 0s
+ 93/100 [==========================>...] - ETA: 0s
+ 95/100 [===========================>..] - ETA: 0s
+ 97/100 [============================>.] - ETA: 0s
+ 99/100 [============================>.] - ETA: 0s
+100/100 [==============================] - 8s 77ms/step
+age_mae: 5.4
+Num of queries for prediction: 100
+predictions: 
+[20 75 50 19 27 34 25 45 11 51 54 32 32 26 42 76 14 28 34 32 31 28 30 23
+ 49 26 36 36 23 49 54 54 54  8 29 26 22  9 22 23 37 36 43 36 44 57 41 16
+ 16 36 53 28 27 44 63 44 28 54 16 25 66 34 54 36 66 36 28 16 52 46 28 30
+ 29 25 32  5 12 26 44 52 47 16 30 22 42 43 35 85 28 16 54 25 50 29 27 13
+ 16 85 28 13]
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005613.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005614.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005615.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005616.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005617.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005618.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005619.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005620.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005621.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005622.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005623.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005624.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005625.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005626.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005627.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005628.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005629.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005630.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005631.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005632.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005633.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005634.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005635.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005636.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005637.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005638.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005639.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005640.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005641.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005642.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005643.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005644.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005645.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005646.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005647.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005648.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005649.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005650.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005651.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005652.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005653.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005654.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005655.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005656.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005657.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005658.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005659.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005660.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005661.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005662.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005663.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005664.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005665.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005666.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005667.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005668.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005669.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005670.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005671.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005672.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005673.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005674.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005675.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005676.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005677.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005678.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005679.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005680.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005681.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005682.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005683.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005684.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005685.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005686.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005687.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005688.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005689.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005690.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005691.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005692.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005693.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005694.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005695.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005696.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005697.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005698.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005699.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005700.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005701.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005702.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005703.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005704.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005705.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005706.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005707.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005708.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005709.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005710.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005711.jpg_face.jpg
+saving /root/datasets/appa-real-release-100-adv/whitebox/fgsm//test/005712.jpg_face.jpg
+Average L2 perturbation summed by channels:  2510.927170949292
+Loading adversarial samples...
+Evaluating the accuracy of the substitute model on adversarial examples...
+Dataset loaded
+Dataset loaded
+
+  1/100 [..............................] - ETA: 17:03
+  3/100 [..............................] - ETA: 5:36 
+  5/100 [>.............................] - ETA: 3:19
+  7/100 [=>............................] - ETA: 2:20
+  9/100 [=>............................] - ETA: 1:47
+ 11/100 [==>...........................] - ETA: 1:26
+ 13/100 [==>...........................] - ETA: 1:12
+ 15/100 [===>..........................] - ETA: 1:01
+ 17/100 [====>.........................] - ETA: 53s 
+ 19/100 [====>.........................] - ETA: 46s
+ 21/100 [=====>........................] - ETA: 41s
+ 23/100 [=====>........................] - ETA: 37s
+ 25/100 [======>.......................] - ETA: 33s
+ 27/100 [=======>......................] - ETA: 30s
+ 29/100 [=======>......................] - ETA: 27s
+ 31/100 [========>.....................] - ETA: 25s
+ 33/100 [========>.....................] - ETA: 23s
+ 35/100 [=========>....................] - ETA: 21s
+ 37/100 [==========>...................] - ETA: 19s
+ 39/100 [==========>...................] - ETA: 18s
+ 41/100 [===========>..................] - ETA: 17s
+ 43/100 [===========>..................] - ETA: 15s
+ 45/100 [============>.................] - ETA: 14s
+ 47/100 [=============>................] - ETA: 13s
+ 49/100 [=============>................] - ETA: 12s
+ 51/100 [==============>...............] - ETA: 11s
+ 53/100 [==============>...............] - ETA: 10s
+ 55/100 [===============>..............] - ETA: 10s
+ 57/100 [================>.............] - ETA: 9s 
+ 59/100 [================>.............] - ETA: 8s
+ 61/100 [=================>............] - ETA: 8s
+ 63/100 [=================>............] - ETA: 7s
+ 65/100 [==================>...........] - ETA: 6s
+ 67/100 [===================>..........] - ETA: 6s
+ 69/100 [===================>..........] - ETA: 5s
+ 71/100 [====================>.........] - ETA: 5s
+ 73/100 [====================>.........] - ETA: 4s
+ 75/100 [=====================>........] - ETA: 4s
+ 77/100 [======================>.......] - ETA: 3s
+ 79/100 [======================>.......] - ETA: 3s
+ 81/100 [=======================>......] - ETA: 3s
+ 83/100 [=======================>......] - ETA: 2s
+ 85/100 [========================>.....] - ETA: 2s
+ 87/100 [=========================>....] - ETA: 2s
+ 89/100 [=========================>....] - ETA: 1s
+ 91/100 [==========================>...] - ETA: 1s
+ 93/100 [==========================>...] - ETA: 1s
+ 95/100 [===========================>..] - ETA: 0s
+ 97/100 [============================>.] - ETA: 0s
+ 99/100 [============================>.] - ETA: 0s
+100/100 [==============================] - 14s 141ms/step
+age_mae: 19.32
+Num of queries for prediction: 100
+predictions: 
+[ 5 85 75 43 56 18  4 54 11 27 56 53 20 26 20 85 18 13 25 36 18  8 47 63
+ 14 25 66 25 51 69 75 85 76 25 54  5 19 53 52 23 30 55 54 55 15 85 54 51
+ 27 60 85 13 14 51 73 13 54 54 26 38 85 85 85 54 85 54 22 66 75 80 22 53
+ 19 61 54  8 35  1 56 61  8 14 53 22 56 59 14 85 85 54 17 75 75 10 20 49
+  8 85 18 52]
