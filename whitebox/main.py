@@ -21,14 +21,14 @@ random.seed(111)
 DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
 
 # remote constants
-# DATASET_PATH = '/root/datasets/appa-real-release/'
+DATASET_PATH = '/root/datasets/appa-real-release'
 
 
 TEST_SAMPLES_NAMES = 'resources/100-test-samples.csv'
 MODEL_PATH = 'resources/models/resnet50-3.456-6.772-adam.hdf5'
 
 ATTACK_NAME = 'fgsm'
-ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
+ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'whitebox/' + ATTACK_NAME + "/"
 
 
 BATCH_SIZE = 1
