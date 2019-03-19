@@ -13,16 +13,27 @@ import keras
 import tensorflow as tf
 import numpy as np
 import random
+import os
 
 random.seed(111)
 
+# prototype constants
+DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
+
+# remote constants
+# DATASET_PATH = '/root/datasets/appa-real-release/'
+
+
+TEST_SAMPLES_NAMES = 'resources/100-test-samples.csv'
+MODEL_PATH = 'resources/models/resnet50-3.456-6.772-adam.hdf5'
+
+ATTACK_NAME = 'fgsm'
+ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
+
+
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/model/InceptionResNetV2-adam-3.268-3.922.hdf5'
-TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
-#MODEL_PATH = '/root/adversarial_framework/model/InceptionResNetV2-sgd-3.086-4.505.hdf5'
-#TEST_SET_PATH = '/root/datasets/appa-real-release-100'
-IMAGE_SIZE = 299
+IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
 
@@ -34,16 +45,15 @@ keras.backend.set_session(sess)
 print("Session initialized")
 
 # load model
-model = load_model(MODEL_PATH, compile=False)
+root_dir = os.path.dirname(os.path.dirname(__file__))
+relative_path = os.path.join(root_dir, MODEL_PATH)
+model = load_model(relative_path, compile=False)
 #model = get_simple_model(NB_CLASSES, IMAGE_SIZE)
 
 model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
 #model.compile(optimizer=rmsprop(lr=0.0001, decay=1e-6), loss="categorical_crossentropy", metrics=['accuracy'])
 
 print("Model loaded")
-
-# load legit dataset
-test_generator = TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE)
 
 # Define input TF placeholder
 x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE, NUM_OF_CHANNELS))
@@ -63,31 +73,29 @@ def bbox_predict(wrap, data, sess, x, batch_size=1):
     return predictions
 
 print("Loading clean samples...")
+
+# load legit dataset
+test_generator = TestGenerator(DATASET_PATH, BATCH_SIZE, IMAGE_SIZE, TEST_SAMPLES_NAMES)
+
 print("Evaluating the accuracy of the model on clean examples...")
-data, labels = get_dataset(TestGenerator(TEST_SET_PATH, BATCH_SIZE, IMAGE_SIZE))
+data, labels = get_dataset(test_generator)
 labels = [np.argmax(label, axis=None, out=None) for label in labels]
 labels = [int(label / int(101 / NB_CLASSES)) for label in labels]
 clean_generator = TransferGenerator(data, labels, NB_CLASSES, BATCH_SIZE, IMAGE_SIZE)
 evaluate_generator(model, clean_generator, EVAL_BATCH_SIZE)
 
-# pick the attack
-#attack = 'fgsm'
-attack = 'cw'
 
-# not working because of memory consumption
-#attack = 'jsma'
-
-RESULT_PATH = TEST_SET_PATH + '-adv/whitebox/' + attack + '/'
+RESULT_PATH = DATASET_PATH + '-adv/whitebox/' + ATTACK_NAME + '/'
 
 wrap = KerasModelWrapper(model)
 bbox_predict(wrap, data, sess, x)
-if attack == 'fgsm':
+if ATTACK_NAME == 'fgsm':
     attack_instance_graph = FastGradientMethod(wrap, sess)
     attack_instance = fgsm
-elif attack == 'cw':
+elif ATTACK_NAME == 'cw':
     attack_instance_graph = CarliniWagnerL2(wrap, sess)
     attack_instance = cw
-elif attack == 'jsma':
+elif ATTACK_NAME == 'jsma':
     attack_instance_graph = SaliencyMapMethod(wrap, sess)
     attack_instance = jsma
 else:
@@ -98,8 +106,8 @@ evaluated_samples = 0
 
 diff_L2 = []
 
-img_ids = [str("00" + str(i)) for i in range(5613, 7613)]
-id_index = 0
+file_names = test_generator.get_file_names()
+image_index = 0
 
 TEN_LABEL = convert_to_one_hot(10, NB_CLASSES)
 NINETY_LABEL = convert_to_one_hot(90, NB_CLASSES)
@@ -114,12 +122,12 @@ for legit_sample, legit_label in test_generator:
 
     diff_L2.append(L2_distance(legit_sample, adv_x))
 
-    save_image(RESULT_PATH + '/test/' + img_ids[id_index] + ".jpg_face.jpg", adv_x[0, :, :, :])
-    id_index += 1
+    save_image(ADV_DATASET_PATH + 'test/' + file_names[image_index], adv_x[0, :, :, :])
+    image_index += 1
 
 print("Average L2 perturbation summed by channels: ", str(sum(diff_L2) / float(len(diff_L2))))
 print("Loading adversarial samples...")
-result_bbox_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE)
+result_bbox_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE, TEST_SAMPLES_NAMES)
 
 print("Evaluating the accuracy of the substitute model on adversarial examples...")
 result_data, result_labels = get_dataset(result_bbox_generator)
