@@ -3,7 +3,7 @@ import keras
 import numpy as np
 import os
 
-from keras.optimizers import Adam
+from keras.optimizers import Adam, SGD
 from six.moves import xrange
 
 from keras.models import load_model
@@ -25,13 +25,13 @@ DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
 NUM_EPOCHS = 1
 
 # remote constants
-DATASET_PATH = '/root/datasets/appa-real-release'
-#NUM_EPOCHS = 40
+# DATASET_PATH = '/root/datasets/appa-real-release'
+# NUM_EPOCHS = 40
 
 
 TRAINING_SAMPLES_NAMES = 'resources/test-custom-dataset.csv'
 TEST_SAMPLES_NAMES = 'resources/test-attack-samples.csv'
-MODEL_PATH = 'resources/models/InceptionResNetV2-adam-3.268-3.922.hdf5'
+BBOX_MODEL_PATH = 'resources/models/resnet50-3.436-5.151-sgd.hdf5'
 
 ATTACK_NAME = 'fgsm'
 ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
@@ -39,7 +39,7 @@ ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1
-IMAGE_SIZE = 299
+IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
 
@@ -47,12 +47,8 @@ NB_CLASSES = 101
 
 def prep_bbox():
     root_dir = os.path.dirname(os.path.dirname(__file__))
-    relative_path = os.path.join(root_dir, MODEL_PATH)
+    relative_path = os.path.join(root_dir, BBOX_MODEL_PATH)
     model = load_model(relative_path, compile=False)
-
-    #model = get_simple_model(num_classes=NB_CLASSES, image_size=IMAGE_SIZE)
-
-
     model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
     wrap = KerasModelWrapper(model)
     print("Model loaded")
@@ -143,8 +139,9 @@ def train_sub_no_augmn(data, target_model, sess):
 
     x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE, NUM_OF_CHANNELS))
 
-    model = get_model()
-    model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
+    model = get_model("ResNet50", NB_CLASSES)
+    # model = get_simple_model(num_classes=NB_CLASSES, image_size=IMAGE_SIZE)
+    model.compile(optimizer=SGD(), loss="categorical_crossentropy", metrics=[age_mae])
     model_sub = KerasModelWrapper(model)
 
     print("Substitute model loaded")
@@ -201,9 +198,9 @@ def blackbox(sess):
     # train substitute using method from https://arxiv.org/abs/1602.02697
     print("Training the substitute model by querying the target network..")
     data, labels = get_dataset(TestGenerator(DATASET_PATH, BATCH_SIZE, IMAGE_SIZE, TRAINING_SAMPLES_NAMES))
-    #substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
-    labels = [np.argmax(label, axis=None, out=None) for label in labels]
-    substitute = train_sub(data_aug=2, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
+    substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
+    #labels = [np.argmax(label, axis=None, out=None) for label in labels]
+    #substitute = train_sub(data_aug=2, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
     test_generator = TestGenerator(DATASET_PATH, BATCH_SIZE, IMAGE_SIZE, TEST_SAMPLES_NAMES)

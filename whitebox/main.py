@@ -18,13 +18,13 @@ import os
 random.seed(111)
 
 # prototype constants
-DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
+DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/chosen-images-cropped'
 
 # remote constants
-DATASET_PATH = '/root/datasets/appa-real-release'
+# DATASET_PATH = '/root/datasets/appa-real-release'
 
 
-TEST_SAMPLES_NAMES = 'resources/100-test-samples.csv'
+TEST_SAMPLES_NAMES = 'resources/chosen-images.csv'
 MODEL_PATH = 'resources/models/resnet50-3.456-6.772-adam.hdf5'
 
 ATTACK_NAME = 'fgsm'
