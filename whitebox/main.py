@@ -1,7 +1,7 @@
 from utils.generator import TestGenerator, TransferGenerator
 from utils.image_ops import L2_distance, save_image
 from utils.model_ops import evaluate_generator, get_dataset, model_argmax
-from utils.numpy_ops import convert_to_one_hot
+from utils.numpy_ops import convert_to_one_hot, print_statistical_information
 from whitebox.attacks import fgsm, cw, jsma
 
 from keras.optimizers import Adam
@@ -24,8 +24,22 @@ DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/chosen-images-cropped'
 # DATASET_PATH = '/root/datasets/appa-real-release'
 
 
-TEST_SAMPLES_NAMES = 'resources/chosen-images.csv'
-MODEL_PATH = 'resources/models/resnet50-3.456-6.772-adam.hdf5'
+TEST_SAMPLES_NAMES = 'resources/100-test-samples.csv'
+
+# model 1
+MODEL_PATH = 'resources/models/resnet50-3.436-5.151-sgd.hdf5'
+IMAGE_SIZE = 224
+# model 2
+# MODEL_PATH = 'resources/models/resnet50-3.456-6.772-adam.hdf5'
+# IMAGE_SIZE == 224
+
+# model 3
+# MODEL_PATH = 'resources/models/InceptionResNetV2-sgd-3.086-4.505.hdf5'
+# IMAGE_SIZE = 299
+
+# model 4
+# MODEL_PATH = 'resources/models/InceptionResNetV2-adam-3.268-3.922.hdf5'
+# IMAGE_SIZE = 299
 
 ATTACK_NAME = 'fgsm'
 ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'whitebox/' + ATTACK_NAME + "/"
@@ -33,7 +47,6 @@ ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'whitebox/' + ATTACK_NAME + "/"
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1
-IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
 
@@ -125,7 +138,8 @@ for legit_sample, legit_label in test_generator:
     save_image(ADV_DATASET_PATH + 'test/' + file_names[image_index], adv_x[0, :, :, :])
     image_index += 1
 
-print("Average L2 perturbation summed by channels: ", str(sum(diff_L2) / float(len(diff_L2))))
+print("Obtaining statistical information for L2 perturbation summed by channels")
+print_statistical_information(diff_L2)
 print("Loading adversarial samples...")
 result_bbox_generator = TestGenerator(RESULT_PATH, BATCH_SIZE, IMAGE_SIZE, TEST_SAMPLES_NAMES)
 
