@@ -68,8 +68,6 @@ class TransferGenerator(Sequence):
         self.batch_size = batch_size
         self.image_size = image_size
         self.num_classes = num_classes
-        self.indices = np.arange(len(self.labels))
-        np.random.shuffle(self.indices)
 
     def __len__(self):
         return self.image_num // self.batch_size
@@ -80,18 +78,12 @@ class TransferGenerator(Sequence):
         x = np.zeros((batch_size, image_size, image_size, 3), dtype=np.uint8)
         y = np.zeros((batch_size, 1), dtype=np.int32)
         for i in range(batch_size):
-            image = self.data[self.indices[idx*batch_size + i]]
+            image = self.data[idx*batch_size + i]
             x[i] = cv2.resize(image, (image_size, image_size))
-            label = self.labels[self.indices[idx*batch_size + i]]
+            label = self.labels[idx*batch_size + i]
             y[i] = label
 
         return x, to_categorical(y, num_classes=self.num_classes)
-
-
-    def on_epoch_end(self):
-        'Updates indexes after each epoch'
-        np.random.shuffle(self.indices)
-
 
     def reinitialize(self, data, labels, batch_size=32, image_size=224):
         self.data = data
@@ -99,8 +91,6 @@ class TransferGenerator(Sequence):
         self.image_num = len(labels)
         self.batch_size = batch_size
         self.image_size = image_size
-        self.indices = np.arange(len(self.labels))
-        np.random.shuffle(self.indices)
 
 
 class CustomGenerator(Sequence):

@@ -31,7 +31,7 @@ NUM_EPOCHS = 1
 
 TRAINING_SAMPLES_NAMES = 'resources/test-custom-dataset.csv'
 TEST_SAMPLES_NAMES = 'resources/test-attack-samples.csv'
-BBOX_MODEL_PATH = 'resources/models/InceptionResNetV2-sgd-3.086-4.505.hdf5'
+BBOX_MODEL_PATH = 'resources/models/resnet50-3.436-5.151-sgd.hdf5'
 
 ATTACK_NAME = 'fgsm'
 ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
@@ -39,7 +39,7 @@ ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1
-BBOX_IMAGE_SIZE = 299
+BBOX_IMAGE_SIZE = 224
 SUB_IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
@@ -152,8 +152,8 @@ def train_sub_no_augmn(data, target_model, sess):
     print("Samples labeled")
 
     print("Training a substitute model...")
-    train_gen = TransferGenerator(data, labels, BATCH_SIZE, SUB_IMAGE_SIZE)
-    model_sub.model.fit_generator(generator=train_gen, epochs=NUM_EPOCHS, verbose=0)
+    train_gen = TransferGenerator(data=data, labels=labels, num_classes=NB_CLASSES, batch_size=BATCH_SIZE, image_size=SUB_IMAGE_SIZE)
+    model_sub.model.fit_generator(generator=train_gen, epochs=NUM_EPOCHS, verbose=1)
     print("Subsitute model trained")
 
     return model_sub
