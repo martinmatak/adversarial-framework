@@ -31,7 +31,7 @@ NUM_EPOCHS = 1
 
 TRAINING_SAMPLES_NAMES = 'resources/test-custom-dataset.csv'
 TEST_SAMPLES_NAMES = 'resources/test-attack-samples.csv'
-BBOX_MODEL_PATH = 'resources/models/resnet50-3.436-5.151-sgd.hdf5'
+BBOX_MODEL_PATH = 'resources/models/InceptionResNetV2-sgd-3.086-4.505.hdf5'
 
 ATTACK_NAME = 'fgsm'
 ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
@@ -39,7 +39,8 @@ ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1
-IMAGE_SIZE = 224
+BBOX_IMAGE_SIZE = 299
+SUB_IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
 
@@ -137,7 +138,7 @@ def train_sub(data_aug, sess,
 def train_sub_no_augmn(data, target_model, sess):
     print("Loading a substitute model...")
 
-    x = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE, IMAGE_SIZE, NUM_OF_CHANNELS))
+    x = tf.placeholder(tf.float32, shape=(None, BBOX_IMAGE_SIZE, BBOX_IMAGE_SIZE, NUM_OF_CHANNELS))
 
     model = get_model("ResNet50", NB_CLASSES)
     # model = get_simple_model(num_classes=NB_CLASSES, image_size=IMAGE_SIZE)
@@ -151,7 +152,7 @@ def train_sub_no_augmn(data, target_model, sess):
     print("Samples labeled")
 
     print("Training a substitute model...")
-    train_gen = TransferGenerator(data, labels, BATCH_SIZE, IMAGE_SIZE)
+    train_gen = TransferGenerator(data, labels, BATCH_SIZE, SUB_IMAGE_SIZE)
     model_sub.model.fit_generator(generator=train_gen, epochs=NUM_EPOCHS, verbose=0)
     print("Subsitute model trained")
 
@@ -197,26 +198,33 @@ def blackbox(sess):
 
     # train substitute using method from https://arxiv.org/abs/1602.02697
     print("Training the substitute model by querying the target network..")
-    data, labels = get_dataset(TestGenerator(DATASET_PATH, BATCH_SIZE, IMAGE_SIZE, TRAINING_SAMPLES_NAMES))
+    data, labels = get_dataset(TestGenerator(DATASET_PATH, BATCH_SIZE, BBOX_IMAGE_SIZE, TRAINING_SAMPLES_NAMES))
     substitute = train_sub_no_augmn(data=data, target_model=target, sess=sess)
     #labels = [np.argmax(label, axis=None, out=None) for label in labels]
     #substitute = train_sub(data_aug=2, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
-    test_generator = TestGenerator(DATASET_PATH, BATCH_SIZE, IMAGE_SIZE, TEST_SAMPLES_NAMES)
-    evaluate_generator(substitute.model, test_generator, EVAL_BATCH_SIZE)
+    test_sub_generator = TestGenerator(DATASET_PATH, BATCH_SIZE, SUB_IMAGE_SIZE, TEST_SAMPLES_NAMES)
+    evaluate_generator(substitute.model, test_sub_generator, EVAL_BATCH_SIZE)
 
     print("Evaluating the accuracy of the black-box model on clean examples...")
-    evaluate_generator(target.model, test_generator, EVAL_BATCH_SIZE)
+    test_bbox_generator = TestGenerator(DATASET_PATH, BATCH_SIZE, BBOX_IMAGE_SIZE, TEST_SAMPLES_NAMES)
+    evaluate_generator(target.model, test_bbox_generator, EVAL_BATCH_SIZE)
 
     print("Generating adversarial samples...")
-    generate_adv_samples(substitute, test_generator, sess)
+    generate_adv_samples(substitute, test_sub_generator, sess)
 
     print("Loading adversarial samples...")
-    result_generator = TestGenerator(ADV_DATASET_PATH, BATCH_SIZE, IMAGE_SIZE, TEST_SAMPLES_NAMES)
+    result_generator = TestGenerator(ADV_DATASET_PATH, BATCH_SIZE, BBOX_IMAGE_SIZE, TEST_SAMPLES_NAMES)
 
     print("Evaluating the accuracy of the substitute model on adversarial examples...")
-    evaluate_generator(substitute.model, result_generator, EVAL_BATCH_SIZE)
+    result_data, result_labels = get_dataset(result_generator)
+
+    result_labels = [np.argmax(label, axis=None, out=None) for label in result_labels]
+    result_labels = [int(label / int(101 / NB_CLASSES)) for label in result_labels]
+
+    sub_adv_generator = TransferGenerator(result_data, result_labels, NB_CLASSES, BATCH_SIZE, SUB_IMAGE_SIZE)
+    evaluate_generator(substitute.model, sub_adv_generator, EVAL_BATCH_SIZE)
 
     print("Evaluating the accuracy of the black-box model on adversarial examples...")
     evaluate_generator(target.model, result_generator, EVAL_BATCH_SIZE)
