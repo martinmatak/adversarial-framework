@@ -1,5 +1,6 @@
 import numpy as np
 from keras import backend as K
+from keras.optimizers import SGD, Adam
 from keras.utils import to_categorical
 from keras.applications import ResNet50, VGG16, InceptionResNetV2
 from keras.layers import Dense, Flatten, Activation, Conv2D
@@ -82,6 +83,24 @@ def get_model(model_name, num_of_classes=101):
 
     model = Model(inputs=base_model.input, outputs=prediction)
     return model
+
+def get_model_by_id(model_id, num_of_classes=101):
+    if model_id == '1':
+        model = get_model("ResNet50", num_of_classes)
+        model.compile(optimizer=SGD(), loss="categorical_crossentropy", metrics=[age_mae])
+        return model
+    if model_id == '2':
+        model = get_model("ResNet50", num_of_classes)
+        model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
+        return model
+    if model_id == '3':
+        model = get_model("InceptionResNetV2", num_of_classes)
+        model.compile(optimizer=SGD(), loss="categorical_crossentropy", metrics=[age_mae])
+        return model
+    if model_id == '3':
+        model = get_model("InceptionResNetV2", num_of_classes)
+        model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=[age_mae])
+        return model
 
 def get_simple_model(num_classes, image_size):
     nb_filters = 64

@@ -2,6 +2,7 @@ import tensorflow as tf
 import keras
 import numpy as np
 import os
+import sys
 
 from keras.optimizers import Adam, SGD
 from six.moves import xrange
@@ -18,7 +19,7 @@ from whitebox.attacks import fgsm, cw
 from utils.image_ops import L2_distance, save_image
 from utils.numpy_ops import convert_to_one_hot, print_statistical_information
 from utils.generator import TestGenerator, TransferGenerator
-from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_model, get_simple_model
+from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_model, get_model_by_id, get_simple_model
 
 # prototype constants
 DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
@@ -31,16 +32,39 @@ NUM_EPOCHS = 1
 
 TRAINING_SAMPLES_NAMES = 'resources/test-custom-dataset.csv'
 TEST_SAMPLES_NAMES = 'resources/test-attack-samples.csv'
-BBOX_MODEL_PATH = 'resources/models/resnet50-3.436-5.151-sgd.hdf5'
 
-ATTACK_NAME = 'fgsm'
+bbox_model = sys.argv[1]
+print("bbox model: " + bbox_model)
+if bbox_model == '1':
+    BBOX_MODEL_PATH = 'resources/models/resnet50-3.436-5.151-sgd.hdf5'
+    BBOX_IMAGE_SIZE = 224
+
+if bbox_model == '2':
+    BBOX_MODEL_PATH = 'resources/models/resnet50-3.456-6.772-adam.hdf5'
+    BBOX_IMAGE_SIZE = 224
+
+if bbox_model == '3':
+    BBOX_MODEL_PATH = 'resources/models/InceptionResNetV2-3.086-4.505-sgd.hdf5'
+    BBOX_IMAGE_SIZE = 299
+
+if bbox_model == '4':
+    BBOX_MODEL_PATH = 'InceptionResNetV2-3.268-3.922-adam.hdf5'
+    BBOX_IMAGE_SIZE = 299
+
+ATTACK_NAME = sys.argv[2]
+print("attack: " + ATTACK_NAME)
+print("bbox path: " + BBOX_MODEL_PATH)
 ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
+
+SUBSTITUTE_MODEL_ID = sys.argv[3]
+
+SUB_IMAGE_SIZE = 299
+if SUBSTITUTE_MODEL_ID == '1' or SUBSTITUTE_MODEL_ID == '2':
+    SUB_IMAGE_SIZE = 224
 
 
 BATCH_SIZE = 1
 EVAL_BATCH_SIZE = 1
-BBOX_IMAGE_SIZE = 224
-SUB_IMAGE_SIZE = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
 
@@ -140,9 +164,9 @@ def train_sub_no_augmn(data, target_model, sess):
 
     x = tf.placeholder(tf.float32, shape=(None, BBOX_IMAGE_SIZE, BBOX_IMAGE_SIZE, NUM_OF_CHANNELS))
 
-    model = get_model("ResNet50", NB_CLASSES)
+    model = get_model_by_id(SUBSTITUTE_MODEL_ID)
     # model = get_simple_model(num_classes=NB_CLASSES, image_size=IMAGE_SIZE)
-    model.compile(optimizer=SGD(), loss="categorical_crossentropy", metrics=[age_mae])
+    #model.compile(optimizer=SGD(), loss="categorical_crossentropy", metrics=[age_mae])
     model_sub = KerasModelWrapper(model)
 
     print("Substitute model loaded")

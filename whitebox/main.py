@@ -34,11 +34,11 @@ IMAGE_SIZE = 224
 # IMAGE_SIZE == 224
 
 # model 3
-# MODEL_PATH = 'resources/models/InceptionResNetV2-sgd-3.086-4.505.hdf5'
+# MODEL_PATH = 'resources/models/InceptionResNetV2-3.086-4.505-sgd.hdf5'
 # IMAGE_SIZE = 299
 
 # model 4
-# MODEL_PATH = 'resources/models/InceptionResNetV2-adam-3.268-3.922.hdf5'
+# MODEL_PATH = 'resources/models/InceptionResNetV2-3.268-3.922-adam.hdf5'
 # IMAGE_SIZE = 299
 
 ATTACK_NAME = 'fgsm'
