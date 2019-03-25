@@ -16,7 +16,7 @@ from cleverhans.utils_keras import KerasModelWrapper
 
 from whitebox.attacks import fgsm, cw
 from utils.image_ops import L2_distance, save_image
-from utils.numpy_ops import convert_to_one_hot
+from utils.numpy_ops import convert_to_one_hot, print_statistical_information
 from utils.generator import TestGenerator, TransferGenerator
 from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_model, get_simple_model
 
@@ -188,7 +188,8 @@ def generate_adv_samples(wrap, generator, sess):
         save_image(ADV_DATASET_PATH + 'test/' + file_names[image_index], adv_x[0, :, :, :])
         image_index += 1
 
-    print("Average L2 perturbation summed by channels: ", str(sum(diff_L2) / float(len(diff_L2))))
+    print("Obtaining statistical information for L2 perturbation summed by channels")
+    print_statistical_information(diff_L2)
 
 
 def blackbox(sess):
