@@ -48,7 +48,7 @@ if bbox_model == '3':
     BBOX_IMAGE_SIZE = 299
 
 if bbox_model == '4':
-    BBOX_MODEL_PATH = 'InceptionResNetV2-3.268-3.922-adam.hdf5'
+    BBOX_MODEL_PATH = 'resources/models/InceptionResNetV2-3.268-3.922-adam.hdf5'
     BBOX_IMAGE_SIZE = 299
 
 ATTACK_NAME = sys.argv[2]
