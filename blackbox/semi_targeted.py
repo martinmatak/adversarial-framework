@@ -209,7 +209,7 @@ def blackbox(sess):
     print("Training the substitute model by querying the target network..")
     data, _ = get_dataset(TestGenerator(appa_dir=DATASET_PATH,
                                              batch_size=BATCH_SIZE,
-                                             image_size=BBOX_IMAGE_SIZE,
+                                             image_size=SUB_IMAGE_SIZE,
                                              chosen_samples_path=TRAINING_SAMPLES_NAMES))
     substitute = train_sub(data_aug=DATA_AUG, target_model=target, sess=sess, x_sub=data, lmbda=.1)
 
