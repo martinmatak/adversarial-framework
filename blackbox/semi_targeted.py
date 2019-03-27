@@ -141,9 +141,9 @@ def train_sub(data_aug, sess,
         print(train_gen.labels)
         model_sub.model.fit_generator(generator=train_gen, epochs=NUM_EPOCHS)
 
-        print("Saving substitute model that is trained so far")
-        path = Path(__file__).resolve().parent.parent.joinpath("resources/models")
-        save_model(str(path) + "sub_model_after_epoch" + str(rho) + ".h5", model_sub.model)
+        # print("Saving substitute model that is trained so far")
+        # path = Path(__file__).resolve().parent.parent.joinpath("resources/models")
+        # save_model(str(path) + "sub_model_after_epoch" + str(rho) + ".h5", model_sub.model)
 
         # input_sample = np.empty(shape=(1, IMAGE_SIZE_SUB, IMAGE_SIZE_SUB, NUM_OF_CHANNELS), dtype=np.float32)
         if rho < data_aug - 1:
