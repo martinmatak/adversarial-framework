@@ -63,8 +63,8 @@ if SUBSTITUTE_MODEL_ID == '1' or SUBSTITUTE_MODEL_ID == '2':
     SUB_IMAGE_SIZE = 224
 
 
-BATCH_SIZE = 1
-EVAL_BATCH_SIZE = 1
+BATCH_SIZE = 2
+EVAL_BATCH_SIZE = 2
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
 
@@ -229,8 +229,8 @@ def blackbox(sess):
     #substitute = train_sub(data_aug=2, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
-    test_sub_generator = TestGenerator(DATASET_PATH, BATCH_SIZE, SUB_IMAGE_SIZE, TEST_SAMPLES_NAMES)
-    evaluate_generator(substitute.model, test_sub_generator, EVAL_BATCH_SIZE)
+    test_sub_generator = TestGenerator(DATASET_PATH, 1, SUB_IMAGE_SIZE, TEST_SAMPLES_NAMES)
+    evaluate_generator(substitute.model, test_sub_generator, 1)
 
     print("Evaluating the accuracy of the black-box model on clean examples...")
     test_bbox_generator = TestGenerator(DATASET_PATH, BATCH_SIZE, BBOX_IMAGE_SIZE, TEST_SAMPLES_NAMES)

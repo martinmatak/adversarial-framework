@@ -3,6 +3,7 @@ import keras
 import numpy as np
 from keras.optimizers import Adam
 from pathlib import Path
+import sys
 
 from six.moves import xrange
 
@@ -20,32 +21,52 @@ from utils.generator import TestGenerator, TransferGenerator, CustomGenerator
 from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_simple_model, get_model, save_model
 
 # prototype constants
-MODEL_PATH = '/Users/mmatak/dev/thesis/adversarial_framework/resources/models/resnet50-3.436-5.151-sgd.hdf5'
-TRAINING_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-100'
-TEST_SET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release-1'
-NUM_EPOCHS_SUB = 1
-ADV_ID_START = 5615
-ADV_ID_END = 7613
-NB_SUB_CLASSES = 5
-AUG_BATCH_SIZE = 16
-PREDICT_BATCH_SIZE = 64
+DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
+NUM_EPOCHS = 1
 
 # remote constants
-#MODEL_PATH = '/root/age-estimation/checkpoints/resnet50-3.436-5.151-sgd.hdf5'
-#TRAINING_SET_PATH = '/root/datasets/appa-real-release'
-#TEST_SET_PATH = '/root/datasets/appa-real-release-100'
-#ADV_ID_START = 5613
+# DATASET_PATH = '/root/datasets/appa-real-release'
+# NUM_EPOCHS = 40
 
-ATTACK_NAME = 'fgsm'
-RESULT_PATH = TEST_SET_PATH + '-adv/blackbox/' + ATTACK_NAME + '/'
-CSV_PATH = TRAINING_SET_PATH + '/' + 'custom-dataset.csv'
+
+TRAINING_SAMPLES_NAMES = 'resources/test-custom-dataset.csv'
+TEST_SAMPLES_NAMES = 'resources/test-attack-samples.csv'
+
+bbox_model = sys.argv[1]
+print("bbox model: " + bbox_model)
+if bbox_model == '1':
+    BBOX_MODEL_PATH = 'resources/models/resnet50-3.436-5.151-sgd.hdf5'
+    BBOX_IMAGE_SIZE = 224
+
+if bbox_model == '2':
+    BBOX_MODEL_PATH = 'resources/models/resnet50-3.456-6.772-adam.hdf5'
+    BBOX_IMAGE_SIZE = 224
+
+if bbox_model == '3':
+    BBOX_MODEL_PATH = 'resources/models/InceptionResNetV2-3.086-4.505-sgd.hdf5'
+    BBOX_IMAGE_SIZE = 299
+
+if bbox_model == '4':
+    BBOX_MODEL_PATH = 'resources/models/InceptionResNetV2-3.268-3.922-adam.hdf5'
+    BBOX_IMAGE_SIZE = 299
+
+ATTACK_NAME = sys.argv[2]
+print("attack: " + ATTACK_NAME)
+print("bbox path: " + BBOX_MODEL_PATH)
+ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
+
+SUBSTITUTE_MODEL_ID = sys.argv[3]
+
+SUB_IMAGE_SIZE = 299
+if SUBSTITUTE_MODEL_ID == '1' or SUBSTITUTE_MODEL_ID == '2':
+    SUB_IMAGE_SIZE = 224
+
 
 BATCH_SIZE = 16
 EVAL_BATCH_SIZE = 16
-IMAGE_SIZE_BBOX = 224
-IMAGE_SIZE_SUB = 224
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
+NB_SUB_CLASSES = 3
 
 
 def prep_bbox():
