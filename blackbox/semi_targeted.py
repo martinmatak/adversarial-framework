@@ -18,12 +18,12 @@ from cleverhans.utils_keras import KerasModelWrapper
 from whitebox.attacks import fgsm, cw
 from utils.image_ops import L2_distance, save_image, resize_images
 from utils.numpy_ops import convert_to_one_hot, print_statistical_information
-from utils.generator import TestGenerator, TransferGenerator, CustomGenerator
-from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_simple_model, get_model, save_model
+from utils.generator import TestGenerator, TransferGenerator
+from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_model_category_by_id, get_simple_model, save_model
 
 # prototype constants
 DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
-NUM_EPOCHS = 1
+NUM_EPOCHS = 2
 
 # remote constants
 # DATASET_PATH = '/root/datasets/appa-real-release'
@@ -59,16 +59,17 @@ ADV_DATASET_PATH = DATASET_PATH + '-adv/' + 'blackbox/' + ATTACK_NAME + "/"
 SUBSTITUTE_MODEL_ID = sys.argv[3]
 
 SUB_IMAGE_SIZE = 299
-if SUBSTITUTE_MODEL_ID == '1' or SUBSTITUTE_MODEL_ID == '2':
+if SUBSTITUTE_MODEL_ID != '3' and SUBSTITUTE_MODEL_ID != '4':
     SUB_IMAGE_SIZE = 224
 
 
-BATCH_SIZE = 1
-EVAL_BATCH_SIZE = 1
+BATCH_SIZE = 2
+EVAL_BATCH_SIZE = 2
 AUG_BATCH_SIZE = 1
+DATA_AUG = 2
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
-NB_SUB_CLASSES = 5
+NB_SUB_CLASSES = 6
 
 
 def prep_bbox():
@@ -115,9 +116,12 @@ def train_sub(data_aug, sess,
     placeholder_bbox = tf.placeholder(tf.float32, shape=(None, BBOX_IMAGE_SIZE, BBOX_IMAGE_SIZE, NUM_OF_CHANNELS))
 
     print("Loading substitute model...")
-    #model = get_simple_model(NB_SUB_CLASSES)
-    model = get_model("ResNet50", NB_SUB_CLASSES)
-    model.compile(optimizer=Adam(lr=0.0001, decay=1e-6), loss="categorical_crossentropy", metrics=['accuracy'])
+    model = get_model_category_by_id(SUBSTITUTE_MODEL_ID, NB_SUB_CLASSES)
+
+    # simple vanilla cnn
+    if SUBSTITUTE_MODEL_ID == '-1':
+        model = get_simple_model(NB_SUB_CLASSES, SUB_IMAGE_SIZE)
+        model.compile(optimizer=Adam(lr=0.1, decay=1e-6), loss="categorical_crossentropy", metrics=[age_mae])
     model_sub = KerasModelWrapper(model)
 
     preds_sub = model_sub.get_logits(placeholder_sub)
@@ -158,7 +162,7 @@ def train_sub(data_aug, sess,
     return model_sub
 
 
-def generate_adv_samples(wrap, generator, sess):
+def generate_adv_samples(wrap, generator, sess, file_names=None):
     if ATTACK_NAME == 'fgsm':
         attack_instance_graph = FastGradientMethod(wrap, sess)
         attack_instance = fgsm
@@ -168,7 +172,8 @@ def generate_adv_samples(wrap, generator, sess):
 
     diff_L2 = []
 
-    file_names = generator.get_file_names()
+    if file_names is None:
+        file_names = generator.get_file_names()
     image_index = 0
 
     TEN_LABEL = convert_to_one_hot(10, NB_CLASSES)
@@ -206,25 +211,26 @@ def blackbox(sess):
                                              batch_size=BATCH_SIZE,
                                              image_size=BBOX_IMAGE_SIZE,
                                              chosen_samples_path=TRAINING_SAMPLES_NAMES))
-    substitute = train_sub(data_aug=3, target_model=target, sess=sess, x_sub=data, lmbda=.1)
+    substitute = train_sub(data_aug=DATA_AUG, target_model=target, sess=sess, x_sub=data, lmbda=.1)
+
+
+
+    print("Evaluating the accuracy of the substitute model on clean examples...")
+    test_data, test_labels = get_dataset(TestGenerator(DATASET_PATH, 1, SUB_IMAGE_SIZE, TEST_SAMPLES_NAMES))
+    test_labels = [np.argmax(label, axis=None, out=None) for label in test_labels]
+    test_labels = [int(label / int(101/NB_SUB_CLASSES)) for label in test_labels]
+    sub_generator = TransferGenerator(test_data, test_labels, NB_SUB_CLASSES, 1, SUB_IMAGE_SIZE)
+    evaluate_generator(substitute.model, sub_generator, EVAL_BATCH_SIZE)
 
     print("Evaluating the accuracy of the black-box model on clean examples...")
     bbox_generator = TestGenerator(DATASET_PATH, 1, SUB_IMAGE_SIZE, TEST_SAMPLES_NAMES)
     evaluate_generator(target.model, bbox_generator, 1)
 
-    print("Evaluating the accuracy of the substitute model on clean examples...")
-    test_data, test_labels = get_dataset(bbox_generator)
-    test_labels = [np.argmax(label, axis=None, out=None) for label in test_labels]
-    test_labels = [int(label / int(101/NB_SUB_CLASSES)) for label in test_labels]
-    sub_generator = TransferGenerator(test_data, test_labels, NB_SUB_CLASSES, BATCH_SIZE, SUB_IMAGE_SIZE)
-    evaluate_generator(substitute.model, sub_generator, EVAL_BATCH_SIZE)
-
     print("Generating adversarial samples...")
-    #TODO: add file where to save adv samples
-    generate_adv_samples(substitute, sub_generator, sess)
+    generate_adv_samples(substitute, sub_generator, sess, bbox_generator.get_file_names())
 
     print("Loading adversarial samples...")
-    result_bbox_generator = TestGenerator(ADV_DATASET_PATH, BATCH_SIZE, BBOX_IMAGE_SIZE)
+    result_bbox_generator = TestGenerator(ADV_DATASET_PATH, BATCH_SIZE, BBOX_IMAGE_SIZE, TEST_SAMPLES_NAMES)
 
     print("Evaluating the accuracy of the substitute model on adversarial examples...")
     result_data, result_labels = get_dataset(result_bbox_generator)
