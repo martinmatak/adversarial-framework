@@ -2,7 +2,6 @@ import tensorflow as tf
 import keras
 import numpy as np
 from keras.optimizers import Adam
-from pathlib import Path
 import sys
 import os
 
@@ -223,7 +222,7 @@ def blackbox(sess):
     evaluate_generator(substitute.model, sub_generator, EVAL_BATCH_SIZE)
 
     print("Evaluating the accuracy of the black-box model on clean examples...")
-    bbox_generator = TestGenerator(DATASET_PATH, 1, SUB_IMAGE_SIZE, TEST_SAMPLES_NAMES)
+    bbox_generator = TestGenerator(DATASET_PATH, 1, BBOX_IMAGE_SIZE, TEST_SAMPLES_NAMES)
     evaluate_generator(target.model, bbox_generator, 1)
 
     print("Generating adversarial samples...")
