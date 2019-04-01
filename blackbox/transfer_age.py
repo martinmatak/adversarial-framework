@@ -19,7 +19,7 @@ from whitebox.attacks import fgsm, cw
 from utils.image_ops import L2_distance, save_image
 from utils.numpy_ops import convert_to_one_hot, print_statistical_information
 from utils.generator import TestGenerator, TransferGenerator
-from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_model, get_model_by_id, get_simple_model
+from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argmax, get_model, get_model_category_by_id, get_simple_model
 
 # prototype constants
 DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
@@ -30,8 +30,8 @@ NUM_EPOCHS = 1
 # NUM_EPOCHS = 40
 
 
-TRAINING_SAMPLES_NAMES = 'resources/test-custom-dataset.csv'
-TEST_SAMPLES_NAMES = 'resources/test-attack-samples.csv'
+TRAINING_SAMPLES_NAMES = 'resources/custom-dataset.csv'
+TEST_SAMPLES_NAMES = 'resources/attack-samples.csv'
 
 bbox_model = sys.argv[1]
 print("bbox model: " + bbox_model)
@@ -63,8 +63,8 @@ if SUBSTITUTE_MODEL_ID == '1' or SUBSTITUTE_MODEL_ID == '2':
     SUB_IMAGE_SIZE = 224
 
 
-BATCH_SIZE = 2
-EVAL_BATCH_SIZE = 2
+BATCH_SIZE = 16
+EVAL_BATCH_SIZE = 16
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
 
@@ -164,7 +164,7 @@ def train_sub_no_augmn(data, target_model, sess):
 
     x = tf.placeholder(tf.float32, shape=(None, BBOX_IMAGE_SIZE, BBOX_IMAGE_SIZE, NUM_OF_CHANNELS))
 
-    model = get_model_by_id(SUBSTITUTE_MODEL_ID)
+    model = get_model_category_by_id(SUBSTITUTE_MODEL_ID)
     # model = get_simple_model(num_classes=NB_CLASSES, image_size=IMAGE_SIZE)
     #model.compile(optimizer=SGD(), loss="categorical_crossentropy", metrics=[age_mae])
     model_sub = KerasModelWrapper(model)
@@ -229,15 +229,15 @@ def blackbox(sess):
     #substitute = train_sub(data_aug=2, target_model=target, sess=sess, x_sub=data, y_sub=labels, lmbda=.1)
 
     print("Evaluating the accuracy of the substitute model on clean examples...")
-    test_sub_generator = TestGenerator(DATASET_PATH, 1, SUB_IMAGE_SIZE, TEST_SAMPLES_NAMES)
-    evaluate_generator(substitute.model, test_sub_generator, 1)
+    test_sub_generator = TestGenerator(DATASET_PATH, EVAL_BATCH_SIZE, SUB_IMAGE_SIZE, TEST_SAMPLES_NAMES)
+    evaluate_generator(substitute.model, test_sub_generator, EVAL_BATCH_SIZE)
 
     print("Evaluating the accuracy of the black-box model on clean examples...")
     test_bbox_generator = TestGenerator(DATASET_PATH, BATCH_SIZE, BBOX_IMAGE_SIZE, TEST_SAMPLES_NAMES)
     evaluate_generator(target.model, test_bbox_generator, EVAL_BATCH_SIZE)
 
     print("Generating adversarial samples...")
-    generate_adv_samples(substitute, test_sub_generator, sess)
+    generate_adv_samples(substitute, TestGenerator(DATASET_PATH, 1, SUB_IMAGE_SIZE, TEST_SAMPLES_NAMES), sess)
 
     print("Loading adversarial samples...")
     result_generator = TestGenerator(ADV_DATASET_PATH, BATCH_SIZE, BBOX_IMAGE_SIZE, TEST_SAMPLES_NAMES)

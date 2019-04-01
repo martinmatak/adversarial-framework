@@ -218,15 +218,16 @@ def blackbox(sess):
     test_data, test_labels = get_dataset(TestGenerator(DATASET_PATH, 1, SUB_IMAGE_SIZE, TEST_SAMPLES_NAMES))
     test_labels = [np.argmax(label, axis=None, out=None) for label in test_labels]
     test_labels = [int(label / int(101/NB_SUB_CLASSES)) for label in test_labels]
-    sub_generator = TransferGenerator(test_data, test_labels, NB_SUB_CLASSES, 1, SUB_IMAGE_SIZE)
+
+    sub_generator = TransferGenerator(test_data, test_labels, NB_SUB_CLASSES, EVAL_BATCH_SIZE, SUB_IMAGE_SIZE)
     evaluate_generator(substitute.model, sub_generator, EVAL_BATCH_SIZE)
 
     print("Evaluating the accuracy of the black-box model on clean examples...")
-    bbox_generator = TestGenerator(DATASET_PATH, 1, BBOX_IMAGE_SIZE, TEST_SAMPLES_NAMES)
-    evaluate_generator(target.model, bbox_generator, 1)
+    bbox_generator = TestGenerator(DATASET_PATH, EVAL_BATCH_SIZE, BBOX_IMAGE_SIZE, TEST_SAMPLES_NAMES)
+    evaluate_generator(target.model, bbox_generator, EVAL_BATCH_SIZE)
 
     print("Generating adversarial samples...")
-    generate_adv_samples(substitute, sub_generator, sess, bbox_generator.get_file_names())
+    generate_adv_samples(substitute, TransferGenerator(test_data, test_labels, NB_SUB_CLASSES, 1, SUB_IMAGE_SIZE), sess, bbox_generator.get_file_names())
 
     print("Loading adversarial samples...")
     result_bbox_generator = TestGenerator(ADV_DATASET_PATH, BATCH_SIZE, BBOX_IMAGE_SIZE, TEST_SAMPLES_NAMES)
