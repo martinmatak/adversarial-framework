@@ -84,22 +84,22 @@ def get_model(model_name, num_of_classes=101):
     model = Model(inputs=base_model.input, outputs=prediction)
     return model
 
-def get_model_category_by_id(model_id, num_of_classes=101):
+def get_model_category_by_id(model_id, num_of_classes=101, metric = age_mae):
     if model_id == '1':
         model = get_model("ResNet50", num_of_classes)
-        model.compile(optimizer=SGD(lr=0.1, decay=1e-6), loss="categorical_crossentropy", metrics=[age_mae])
+        model.compile(optimizer=SGD(lr=0.1, decay=1e-6), loss="categorical_crossentropy", metrics=[metric])
         return model
     if model_id == '2':
         model = get_model("ResNet50", num_of_classes)
-        model.compile(optimizer=Adam(lr=0.1, decay=1e-6), loss="categorical_crossentropy", metrics=[age_mae])
+        model.compile(optimizer=Adam(lr=0.1, decay=1e-6), loss="categorical_crossentropy", metrics=[metric])
         return model
     if model_id == '3':
         model = get_model("InceptionResNetV2", num_of_classes)
-        model.compile(optimizer=SGD(lr=0.1, decay=1e-6), loss="categorical_crossentropy", metrics=[age_mae])
+        model.compile(optimizer=SGD(lr=0.1, decay=1e-6), loss="categorical_crossentropy", metrics=[metric])
         return model
     if model_id == '4':
         model = get_model("InceptionResNetV2", num_of_classes)
-        model.compile(optimizer=Adam(lr=0.1, decay=1e-6), loss="categorical_crossentropy", metrics=[age_mae])
+        model.compile(optimizer=Adam(lr=0.1, decay=1e-6), loss="categorical_crossentropy", metrics=[metric])
         return model
 
 

@@ -22,15 +22,15 @@ from utils.model_ops import evaluate_generator, age_mae, get_dataset, model_argm
 
 # prototype constants
 DATASET_PATH = '/Users/mmatak/dev/thesis/datasets/appa-real-release'
-NUM_EPOCHS = 2
+NUM_EPOCHS = 10
 
 # remote constants
 # DATASET_PATH = '/root/datasets/appa-real-release'
 # NUM_EPOCHS = 40
 
 
-TRAINING_SAMPLES_NAMES = 'resources/test-custom-dataset.csv'
-TEST_SAMPLES_NAMES = 'resources/test-attack-samples.csv'
+TRAINING_SAMPLES_NAMES = 'resources/custom-dataset.csv'
+TEST_SAMPLES_NAMES = 'resources/attack-samples.csv'
 
 bbox_model = sys.argv[1]
 print("bbox model: " + bbox_model)
@@ -65,10 +65,10 @@ if SUBSTITUTE_MODEL_ID != '3' and SUBSTITUTE_MODEL_ID != '4':
 BATCH_SIZE = 2
 EVAL_BATCH_SIZE = 2
 AUG_BATCH_SIZE = 1
-DATA_AUG = 2
+DATA_AUG = 5
 NUM_OF_CHANNELS = 3
 NB_CLASSES = 101
-NB_SUB_CLASSES = 6
+NB_SUB_CLASSES = 3
 
 
 def prep_bbox():
@@ -115,12 +115,12 @@ def train_sub(data_aug, sess,
     placeholder_bbox = tf.placeholder(tf.float32, shape=(None, BBOX_IMAGE_SIZE, BBOX_IMAGE_SIZE, NUM_OF_CHANNELS))
 
     print("Loading substitute model...")
-    model = get_model_category_by_id(SUBSTITUTE_MODEL_ID, NB_SUB_CLASSES)
+    model = get_model_category_by_id(SUBSTITUTE_MODEL_ID, NB_SUB_CLASSES, metric='accuracy')
 
     # simple vanilla cnn
     if SUBSTITUTE_MODEL_ID == '-1':
         model = get_simple_model(NB_SUB_CLASSES, SUB_IMAGE_SIZE)
-        model.compile(optimizer=Adam(lr=0.1, decay=1e-6), loss="categorical_crossentropy", metrics=[age_mae])
+        model.compile(optimizer=Adam(lr=0.1, decay=1e-6), loss="categorical_crossentropy", metrics=['accuracy'])
     model_sub = KerasModelWrapper(model)
 
     preds_sub = model_sub.get_logits(placeholder_sub)
